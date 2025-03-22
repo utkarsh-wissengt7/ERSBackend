@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/api/notifications/")
 public class NotificationController {
 
     private static final Logger log = LogManager.getLogger(NotificationController.class);
@@ -29,27 +29,30 @@ public class NotificationController {
         return notificationService.getNotificationById(id);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable Long userId) {
+        List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
+        return ResponseEntity.ok(notifications);
+    }
+
+
     @PostMapping
-    public Notification createNotification(@RequestBody Notification notification) {
-
-        log.info(String.valueOf(notification));
-        return notificationService.createNotification(notification);
+    public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
+        Notification createdNotification = notificationService.createNotification(notification);
+        return ResponseEntity.ok(createdNotification);
     }
 
-    @PutMapping("/{id}")
-    public Notification updateNotification(@PathVariable Long id, @RequestBody Notification notificationDetails) {
-        return notificationService.updateNotification(id, notificationDetails);
-    }
+
+//    @PutMapping("/{id}")
+//    public Notification updateNotification(@PathVariable Long id, @RequestBody Notification notificationDetails) {
+//        return notificationService.updateNotification(id, notificationDetails);
+//    }
 
     @DeleteMapping("/{id}")
     public void deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Notification> getNotificationsByUserId(@PathVariable Long userId) {
-        return notificationService.getNotificationsByUserId(userId);
-    }
 
     @GetMapping("/status/{status}")
     public List<Notification> getNotificationsByStatus(@PathVariable String status) {

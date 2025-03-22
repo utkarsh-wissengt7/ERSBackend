@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.example.demo.models.User;
 import com.example.demo.services.UserService;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
 
@@ -47,6 +49,7 @@ public class UserController {
     // Create a new user
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
+        logger.info("Received Post: {}", user);
         User createdUser = userService.createUser(user);
         return ResponseEntity.ok(createdUser);
     }

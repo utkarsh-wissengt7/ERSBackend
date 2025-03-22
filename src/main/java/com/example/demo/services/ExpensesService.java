@@ -7,6 +7,7 @@ import com.example.demo.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,11 +34,12 @@ public class ExpensesService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        expense.setUser(user); // Set User object instead of just ID
-        expense.setStatus("PENDING"); // Set default status
-        System.out.println("yeh leeee"+String.valueOf(expense));
+        expense.setUser(user);
+        expense.setStatus("PENDING");
+
         return expensesRepository.save(expense);
     }
+
 
     public Expenses updateExpense(Long id, Long userId, Expenses updatedExpense) {
         return expensesRepository.findByIdAndUserId(id, userId).map(expense -> {
@@ -64,13 +66,27 @@ public class ExpensesService {
         return expensesRepository.findByUserIdAndStatus(userId, "APPROVED");
     }
 
-    public Expenses updateApprovalStatus(Long id, Long userId, String status) {
+    public Expenses updateApprovalStatus(Long id, Long userId, String status, Long approvedBy) {
         return expensesRepository.findByIdAndUserId(id, userId).map(expense -> {
-            if (status.equalsIgnoreCase("APPROVED") || status.equalsIgnoreCase("REJECTED")) {
+            if (status.equalsIgnoreCase("APPROVED")) {
                 expense.setStatus(status);
+                expense.setApprovedBy(approvedBy);
                 return expensesRepository.save(expense);
             }
             throw new IllegalArgumentException("Invalid status");
         }).orElseThrow(() -> new IllegalArgumentException("Expense not found for user"));
     }
+
+    public Expenses updateRejectionStatus(Long id, Long userId, String status, String reason, Long rejectedBy) {
+        return expensesRepository.findByIdAndUserId(id, userId).map(expense -> {
+             if(status.equalsIgnoreCase("REJECTED")){
+                expense.setStatus(status);
+                expense.setReasonForRejection(reason);
+                expense.setRejectedBy(rejectedBy);
+                return expensesRepository.save(expense);
+            }
+            throw new IllegalArgumentException("Invalid status");
+        }).orElseThrow(() -> new IllegalArgumentException("Expense not found for user"));
+    }
+
 }

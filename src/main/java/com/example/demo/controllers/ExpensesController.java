@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.example.demo.dto.ExpenseRequest;
 import com.example.demo.models.Expenses;
 import com.example.demo.services.ExpensesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,10 @@ public class ExpensesController {
 
     // Create a new expense for the logged-in user
     @PostMapping
-    public Expenses createExpense(@RequestParam Long userId, @RequestBody Expenses expense) {
-        return expensesService.createExpense(userId, expense);
+    public Expenses createExpense(@RequestBody ExpenseRequest request) {
+        return expensesService.createExpense(request.getUserId(), request.getExpense());
     }
+
 
     // Update an existing expense for the logged-in user
     @PutMapping("/{id}")
@@ -58,8 +60,15 @@ public class ExpensesController {
     }
 
     // Update approval status for an expense for the logged-in user
-    @PutMapping("/{id}/status")
-    public Expenses updateApprovalStatus(@PathVariable Long id, @RequestParam Long userId, @RequestParam String status) {
-        return expensesService.updateApprovalStatus(id, userId, status);
+
+    @PutMapping("/{id}/status/approve")
+    public Expenses updateApprovalStatus(@PathVariable Long id, @RequestParam Long userId, @RequestParam String status,
+                                         @RequestParam Long approvedBy) {
+        return expensesService.updateApprovalStatus(id, userId, status, approvedBy);
+    }
+    @PutMapping("/{id}/status/reject")
+    public Expenses updateRejectionStatus(@PathVariable Long id, @RequestParam Long userId, @RequestParam String status,
+                                         @RequestParam String reason, @RequestParam Long rejectedBy) {
+        return expensesService.updateRejectionStatus(id, userId, status, reason, rejectedBy);
     }
 }

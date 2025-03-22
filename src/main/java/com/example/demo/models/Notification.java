@@ -18,9 +18,8 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "userID", nullable = true)
-    private User user;
+    @Column(name = "userID", nullable = true)
+    private Long userId;  // Store only the user ID instead of the User entity
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -28,16 +27,14 @@ public class Notification {
     @Column(nullable = false)
     private String status;  // Accepted, Rejected, Pending
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "expenseID", nullable = true)
-    private Expenses expense;
+    @Column(name = "expenseID", nullable = true)
+    private Long expenseId; // Store only expense ID
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "managerID", nullable = true)
-    private User manager;
+    @Column(name = "managerID", nullable = true)
+    private Long managerId; // Store only manager ID
 
     @Column(nullable = false, length = 500)
-    private String message; // Added the missing field
+    private String message; // Notification message
 
     @PrePersist
     protected void onCreate() {
@@ -48,5 +45,4 @@ public class Notification {
             this.status = "Pending";
         }
     }
-
 }

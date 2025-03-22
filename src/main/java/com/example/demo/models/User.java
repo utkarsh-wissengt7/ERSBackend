@@ -34,6 +34,7 @@ public class User {
     @JsonIgnore
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters long")
+    @Column(nullable = false)
     private String password;
 
     private String role;
@@ -46,8 +47,8 @@ public class User {
 
     // Store only subordinate IDs instead of User references
     @ElementCollection
-    @CollectionTable(name = "user_subordinates", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "subordinate_id")
+//    @CollectionTable(name = "user_subordinates", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "subordinate_id", nullable = true)
     private List<Long> subordinateIds;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
