@@ -1,85 +1,80 @@
 package com.example.demo.controllers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.example.demo.repositories.UserRepository;
+import com.example.demo.dto.LoginRequest;
 import com.example.demo.models.User;
 import com.example.demo.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/users/")
 public class UserController {
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
+    @Autowired  // ✅ Injecting the repository
+    private UserRepository userRepository;
     private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    // Get user by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // Get all users
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("/Login")
-    public ResponseEntity<?> authenticateUser(
-            @RequestParam String email,
-            @RequestParam String password) {
-        return userService.authenticateUser(email, password)
-                .map(user -> ResponseEntity.ok().body(user))  // Return user if found
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new User())); // Return empty object
-    }
-
-
-
-    // Create a new user
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        logger.info("Received Post: {}", user);
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.ok(createdUser);
+        return ResponseEntity.ok(userService.createUser(user));
     }
 
-    // Update user details
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        try {
-            User user = userService.updateUser(id, updatedUser);
-            return ResponseEntity.ok(user);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+    @GetMapping("/{wissenID}")
+    public ResponseEntity<User> getUserById(@PathVariable String wissenID) {
+        return userService.getUserById(wissenID)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/getReporteeInfo")
+    public ResponseEntity<Map<String, String>> getReporteeInfo(@RequestParam String reporteeWissenId) {
+        return userService.getUserById(reporteeWissenId)
+                .map(user -> ResponseEntity.ok(Map.of(
+                        "wissenID", user.getWissenID(),
+                        "name", user.getName(),
+                        "email", user.getEmail()
+                )))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        Optional<User> userOptional = userRepository.findByEmailAndPassword(
+                loginRequest.getEmail(), loginRequest.getPassword()
+        );
+
+        if (userOptional.isPresent()) {
+            return ResponseEntity.ok(userOptional.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 
-    // Delete a user by ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        try {
-            userService.deleteUser(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+    @PutMapping("/{wissenID}")
+    public ResponseEntity<User> updateUser(@PathVariable String wissenID, @RequestBody User user) {
+        return ResponseEntity.ok(userService.updateUser(wissenID, user));
     }
 
-    // Authenticate user
-//    @PostMapping("/authenticate")
-//    public ResponseEntity<User> authenticateUser(@RequestParam String email, @RequestParam String password) {
-//        Optional<User> user = userService.authenticateUser(email, password);
-//        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(401).build());
-//    }
+    @DeleteMapping("/{wissenID}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String wissenID) {
+        userService.deleteUser(wissenID);
+        return ResponseEntity.noContent().build();
+    }
 }

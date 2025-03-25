@@ -1,13 +1,20 @@
 package com.example.demo.models;
 
+import com.example.demo.converters.StringListConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+//import io.hypersistence.utils.hibernate.type.json.JsonType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,8 +26,9 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @NotBlank(message = "Wissen ID is required")
+    @Column(name = "wissen_id", unique = true, nullable = false)
+    private String wissenID;
 
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
@@ -31,7 +39,7 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    @JsonIgnore
+
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters long")
     @Column(nullable = false)
@@ -41,16 +49,21 @@ public class User {
 
     private LocalDate dateOfJoining;
 
-    // Store only manager's ID instead of User reference
     @Column(name = "manager_id")
-    private Long managerId;
+    private String managerId;
 
-    // Store only subordinate IDs instead of User references
-    @ElementCollection
-//    @CollectionTable(name = "user_subordinates", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "subordinate_id", nullable = true)
-    private List<Long> subordinateIds;
+    @Column(name = "reportees", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<String> reportees = new ArrayList<>();
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean isManager; // Newly added column
+    private boolean isManager;
+
+    public Boolean getIsManager() {  // Ensure this getter method exists
+        return isManager;
+    }
+
+    public void setIsManager(Boolean isManager) {
+        this.isManager = isManager;
+    }
 }

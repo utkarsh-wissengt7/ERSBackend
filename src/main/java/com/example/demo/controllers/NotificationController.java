@@ -30,7 +30,7 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
         List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
         return ResponseEntity.ok(notifications);
     }
@@ -38,8 +38,17 @@ public class NotificationController {
 
     @PostMapping
     public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
-        Notification createdNotification = notificationService.createNotification(notification);
-        return ResponseEntity.ok(createdNotification);
+        try {
+            if (notification.getMessage() == null || notification.getUserId() == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Notification createdNotification = notificationService.createNotification(notification);
+            return ResponseEntity.ok(createdNotification);
+        } catch (Exception e) {
+            log.error("Error creating notification: ", e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 
@@ -47,6 +56,7 @@ public class NotificationController {
 //    public Notification updateNotification(@PathVariable Long id, @RequestBody Notification notificationDetails) {
 //        return notificationService.updateNotification(id, notificationDetails);
 //    }
+
 
     @DeleteMapping("/{id}")
     public void deleteNotification(@PathVariable Long id) {

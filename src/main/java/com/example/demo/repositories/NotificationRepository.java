@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findByUserId(Long userId); // Fetch notifications by User ID
+    List<Notification> findByUserId(String userId); // Fetch notifications by User ID
     List<Notification> findByStatus(String status); // Fetch notifications by status (Accepted, Rejected, Pending)
 }

@@ -9,9 +9,11 @@ import java.util.Optional;
 
 @Repository
 public interface ExpensesRepository extends JpaRepository<Expenses, Long> {
-    List<Expenses> findByUserId(Long userId);
-    Optional<Expenses> findFirstByUserId(Long userId);
-    Optional<Expenses> findByIdAndUserId(Long id, Long userId);
-    boolean existsByIdAndUserId(Long id, Long userId);
-    List<Expenses> findByUserIdAndStatus(Long userId, String status);
+    List<Expenses> findByUser_WissenIDAndStatus(String wissenID, String status);
+    Optional<Expenses> findFirstByUser_WissenID(String wissenID);
+    Optional<Expenses> findByIdAndUser_WissenID(Long id, String wissenID);
+    boolean existsByIdAndUser_WissenID(Long id, String wissenID);
+//    List<Expenses> findByUser_WissenID(String wissenID);
+
+    List<Expenses> findByUser_wissenID(String wissenID);
 }

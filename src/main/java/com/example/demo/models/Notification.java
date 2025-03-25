@@ -18,8 +18,8 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "userID", nullable = true)
-    private Long userId;  // Store only the user ID instead of the User entity
+    @Column(name = "userID", length = 10)
+    private String userId;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -30,8 +30,8 @@ public class Notification {
     @Column(name = "expenseID", nullable = true)
     private Long expenseId; // Store only expense ID
 
-    @Column(name = "managerID", nullable = true)
-    private Long managerId; // Store only manager ID
+    @Column(name = "managerID", length = 10)
+    private String managerId;
 
     @Column(nullable = false, length = 500)
     private String message; // Notification message

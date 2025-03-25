@@ -2,18 +2,16 @@ package com.example.demo.services;
 
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
-    @Autowired
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
@@ -21,60 +19,49 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Get a user by ID
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
-    }
-
-    // Get all users
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    // Create a new user
     public User createUser(User user) {
-        // Hash the password before saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // Validate manager ID before saving
-        if (user.getManagerId() != null) {
-            Optional<User> manager = userRepository.findById(user.getManagerId());
-            if (manager.isEmpty()) {
-                throw new IllegalArgumentException("Invalid Manager ID: " + user.getManagerId());
-            }
+//        user.setPassword(passwordEncoder.encode(user.getPassword())); // Encrypt password
+        user.setPassword(user.getPassword());
+        if (user.getReportees() == null) {
+            user.setReportees(new ArrayList<>());
         }
-
+        user.setReportees(new ArrayList<>(user.getReportees()));
         return userRepository.save(user);
     }
 
-    // Update user details
-    public User updateUser(Long id, User updatedUser) {
-        return userRepository.findById(id).map(user -> {
+    public Optional<User> getUserById(String wissenID) {
+        return userRepository.findById(wissenID);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findByRoleNot("ADMIN");
+    }
+
+    public Optional<User> authenticateUser(String email, String password) {
+        return userRepository.findByEmail(email)
+                .filter(user -> passwordEncoder.matches(password, user.getPassword()));
+    }
+
+    public User updateUser(String wissenID, User updatedUser) {
+        return userRepository.findById(wissenID).map(user -> {
             user.setName(updatedUser.getName());
             user.setEmail(updatedUser.getEmail());
             user.setRole(updatedUser.getRole());
             user.setDateOfJoining(updatedUser.getDateOfJoining());
             user.setManagerId(updatedUser.getManagerId());
+            user.setIsManager(updatedUser.getIsManager());
 
-            // Update password only if provided
             if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-                user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+                if (!passwordEncoder.matches(updatedUser.getPassword(), user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+                }
             }
 
             return userRepository.save(user);
-        }).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
+        }).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    // Delete a user by ID
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("User not found with ID: " + id);
-        }
-        userRepository.deleteById(id);
-    }
-
-    // Authenticate a user by email and password
-    public Optional<User> authenticateUser(String email, String password) {
-        return userRepository.findByEmailAndPassword(email, password);
+    public void deleteUser(String wissenID) {
+        userRepository.deleteById(wissenID);
     }
 }

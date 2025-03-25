@@ -3,7 +3,7 @@ package com.example.demo.models;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Table(name = "expenses")
@@ -17,26 +17,27 @@ public class Expenses {
     private Long expenseID;
 
     @ManyToOne
-    @JoinColumn(name = "userID")
+    @JoinColumn(name = "wissen_id", referencedColumnName = "wissen_id")
     private User user;
 
-    private String title;  // New field for title
-    private String description; // New field for description
+    @Column(name = "wissen_id", insertable = false, updatable = false)
+    private String wissenID;  // Add this field to match repository query
+
+    private String description;
     private Double amount;
     private String category;
     private String receipt;
     private String status;
-    private Long approvedBy;
-    private Long rejectedBy;
+    @Column(length = 10)
+    private String approvedBy;
+
+    @Column(length = 10)
+    private String rejectedBy;
     private String reasonForRejection;
 
-    @Column(nullable = true, updatable = true)
-    private LocalDate dateCreated; // Auto-set to current date
-
-    @PrePersist
-    protected void onCreate() {
-        this.dateCreated = LocalDate.now(); // Set to the current date on creation
-    }
+    @Column(name = "created_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
     public Long getId() {
         return expenseID;
