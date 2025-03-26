@@ -52,16 +52,13 @@ public class ExpensesController {
     public ResponseEntity<Expenses> createExpense(@RequestBody ExpenseRequest request) {
         try {
             Expenses expense = new Expenses();
-            expense.setCategory(request.getExpense().getCategory());
-            expense.setAmount(request.getExpense().getAmount());
-            expense.setDescription(request.getExpense().getDescription());
-            expense.setReceipt(request.getExpense().getReceipt());
-
-            // Set additional fields
+            expense.setCategory(request.getCategory());
+            expense.setAmount(request.getAmount());
+            expense.setDescription(request.getDescription());
+            expense.setReceipt(request.getReceipt());
             expense.setStatus("PENDING");
             expense.setCreatedAt(new Date());
 
-            // Set user details using the userId from request
             User user = new User();
             user.setWissenID(request.getUserId());
             expense.setUser(user);
@@ -83,10 +80,10 @@ public class ExpensesController {
             }
 
             Expenses expense = existingExpense.get();
-            expense.setCategory(request.getExpense().getCategory());
-            expense.setAmount(request.getExpense().getAmount());
-            expense.setDescription(request.getExpense().getDescription());
-            expense.setReceipt(request.getExpense().getReceipt());
+            expense.setCategory(request.getCategory());
+            expense.setAmount(request.getAmount());
+            expense.setDescription(request.getDescription());
+            expense.setReceipt(request.getReceipt());
 
             return ResponseEntity.ok(expensesService.updateExpense(expense));
         } catch (Exception e) {

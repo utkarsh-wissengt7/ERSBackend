@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.example.demo.dto.NotificationRequest;
 import com.example.demo.models.Notification;
 import com.example.demo.services.NotificationService;
 import org.apache.logging.log4j.LogManager;
@@ -37,11 +38,19 @@ public class NotificationController {
 
 
     @PostMapping
-    public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
+    public ResponseEntity<Notification> createNotification(@RequestBody NotificationRequest request) {
         try {
-            if (notification.getMessage() == null || notification.getUserId() == null) {
+            if (request.getMessage() == null || request.getUserId() == null) {
                 return ResponseEntity.badRequest().build();
             }
+
+            Notification notification = Notification.builder()
+                    .message(request.getMessage())
+                    .status(request.getStatus())
+                    .userId(request.getUserId())
+                    .managerId(request.getManagerId())
+                    .expenseId(request.getExpenseId())
+                    .build();
 
             Notification createdNotification = notificationService.createNotification(notification);
             return ResponseEntity.ok(createdNotification);

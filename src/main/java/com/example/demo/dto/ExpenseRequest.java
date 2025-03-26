@@ -5,5 +5,8 @@ import lombok.Data;
 @Data
 public class ExpenseRequest {
     private String userId;
-    private ExpenseDetails expense;
+    private String category;
+    private Double amount;
+    private String description;
+    private String receipt;
 }
