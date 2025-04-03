@@ -2,15 +2,21 @@ package com.example.demo.services;
 
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.demo.exceptions.ResourceNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserService {
+    @Autowired
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -61,7 +67,27 @@ public class UserService {
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public void deleteUser(String wissenID) {
-        userRepository.deleteById(wissenID);
-    }
+//    public void deleteUser(String wissenID) {
+//        try {
+//            Optional<User> user = userRepository.findById(wissenID);
+//            if (user.isEmpty()) {
+//                throw new ResourceNotFoundException("User not found with ID: " + wissenID);
+//            }
+//
+//            userRepository.deleteById(wissenID);
+//        } catch (DataIntegrityViolationException e) {
+//            log.error("Cannot delete user with ID {} due to existing references", wissenID, e);
+//            throw new IllegalStateException("Cannot delete user as they have associated records");
+//        } catch (Exception e) {
+//            log.error("Error deleting user with ID: {}", wissenID, e);
+//            throw new RuntimeException("Failed to delete user");
+//        }
+//    }
+public User toggleUserActiveStatus(String wissenID) {
+    User user = userRepository.findById(wissenID)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + wissenID));
+    user.setActive(!user.isActive());  // Changed from setIsActive/getIsActive
+    return userRepository.save(user);
+}
+
 }

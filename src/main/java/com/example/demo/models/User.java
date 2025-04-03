@@ -59,6 +59,9 @@ public class User {
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isManager;
 
+    @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean isActive = true;
+
     public Boolean getIsManager() {  // Ensure this getter method exists
         return isManager;
     }

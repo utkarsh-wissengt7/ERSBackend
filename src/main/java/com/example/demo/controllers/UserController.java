@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.demo.exceptions.ResourceNotFoundException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,10 +62,20 @@ public class UserController {
         );
 
         if (userOptional.isPresent()) {
-            return ResponseEntity.ok(userOptional.get());
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            User user = userOptional.get();
+            System.out.println("User active status: " + user.isActive());  // Debug log
+
+            if (!user.isActive()) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Account is inactive. Please contact your administrator.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            }
+            return ResponseEntity.ok(user);
         }
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Invalid credentials");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
 
@@ -72,9 +84,30 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(wissenID, user));
     }
 
-    @DeleteMapping("/{wissenID}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String wissenID) {
-        userService.deleteUser(wissenID);
-        return ResponseEntity.noContent().build();
+//    @DeleteMapping("/{wissenID}")
+//    public ResponseEntity<?> deleteUser(@PathVariable String wissenID) {
+//        try {
+//            userService.deleteUser(wissenID);
+//            return ResponseEntity.noContent().build();
+//        } catch (ResourceNotFoundException e) {
+//            return ResponseEntity.notFound().build();
+//        } catch (IllegalStateException e) {
+//            return ResponseEntity.status(HttpStatus.CONFLICT)
+//                    .body("User cannot be deleted due to existing references");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Failed to delete user");
+//        }
+//    }
+@PutMapping("/toggle-status/{wissenID}")
+public ResponseEntity<User> toggleUserStatus(@PathVariable String wissenID) {
+    try {
+        User updatedUser = userService.toggleUserActiveStatus(wissenID);
+        return ResponseEntity.ok(updatedUser);
+    } catch (ResourceNotFoundException e) {
+        return ResponseEntity.notFound().build();
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+}
 }
