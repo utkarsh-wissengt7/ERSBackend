@@ -4,6 +4,7 @@ import com.example.demo.dto.ExpenseRequest;
 import com.example.demo.models.Expenses;
 import com.example.demo.models.User;
 import com.example.demo.services.ExpensesService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/expenses/")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class ExpensesController {
 
     @Autowired
@@ -23,6 +25,7 @@ public class ExpensesController {
 
     @GetMapping("/user")
     public List<Expenses> getAllExpensesByUserWissenID(@RequestParam String userId) {
+        System.out.println("i am getting called in getAllExpensesByUserWissenID");
         return expensesService.getExpensesByUserWissenID(userId);
     }
 
@@ -90,6 +93,38 @@ public class ExpensesController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+
+//    @PutMapping("/{id}/status/{action}")
+//    public ResponseEntity<Expenses> updateExpenseStatus(
+//            @PathVariable Long id,
+//            @PathVariable String action,
+//            @RequestParam String userId,
+//            @RequestParam String status,
+//            @RequestParam(required = false) String approvedBy,
+//            @RequestParam(required = false) String rejectedBy,
+//            @RequestParam(required = false) String reason) {
+//        try {
+//            Optional<Expenses> existingExpense = expensesService.getExpenseByIdAndUserWissenID(id, userId);
+//            if (existingExpense.isEmpty()) {
+//                return ResponseEntity.notFound().build();
+//            }
+//
+//            Expenses expense = existingExpense.get();
+//            expense.setStatus(status);
+//
+//            if ("approve".equals(action) && approvedBy != null) {
+//                expense.setApprovedBy(approvedBy);
+//            } else if ("reject".equals(action) && rejectedBy != null) {
+//                expense.setRejectedBy(rejectedBy);
+//                expense.setReasonForRejection(reason);
+//            }
+//
+//            return ResponseEntity.ok(expensesService.updateExpense(expense));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+//        }
+//    }
+
     @PutMapping("/{id}/status/{action}")
     public ResponseEntity<Expenses> updateExpenseStatus(
             @PathVariable Long id,
@@ -100,26 +135,20 @@ public class ExpensesController {
             @RequestParam(required = false) String rejectedBy,
             @RequestParam(required = false) String reason) {
         try {
-            Optional<Expenses> existingExpense = expensesService.getExpenseByIdAndUserWissenID(id, userId);
-            if (existingExpense.isEmpty()) {
-                return ResponseEntity.notFound().build();
+            if ("approve".equals(action)) {
+                return ResponseEntity.ok(expensesService.approveExpense(id));
+            } else if ("reject".equals(action)) {
+                return ResponseEntity.ok(expensesService.rejectExpense(id, reason));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-
-            Expenses expense = existingExpense.get();
-            expense.setStatus(status);
-
-            if ("approve".equals(action) && approvedBy != null) {
-                expense.setApprovedBy(approvedBy);
-            } else if ("reject".equals(action) && rejectedBy != null) {
-                expense.setRejectedBy(rejectedBy);
-                expense.setReasonForRejection(reason);
-            }
-
-            return ResponseEntity.ok(expensesService.updateExpense(expense));
+        } catch (MessagingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(
             @PathVariable Long id,
@@ -129,7 +158,6 @@ public class ExpensesController {
             if (expense.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-
             expensesService.deleteExpense(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {

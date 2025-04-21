@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            padding: 10px 0;
+            border-radius: 8px 8px 0 0;
+        }
+        .header.approved {
+            background-color: #4CAF50; /* Green for approved */
+        }
+        .header.rejected {
+            background-color: #FF0000; /* Red for rejected */
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header {status}">
+            <h1>Expense Update</h1>
+        </div>
+        <p>Hi <strong>{name}</strong>,</p>
+        <p>Your expense with ID <strong>{expenseId}</strong> has been <strong>{status}</strong>.</p>
+        <p>{message}</p>
+        <div class="footer">
+            <p>Best Regards,<br/>The Team</p>
+        </div>
+    </div>
+</body>
+</html>

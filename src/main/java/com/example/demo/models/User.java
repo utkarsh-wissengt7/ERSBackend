@@ -12,9 +12,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.Type;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -49,6 +52,10 @@ public class User {
 
     private LocalDate dateOfJoining;
 
+    @ManyToOne
+    @JoinColumn(name = "manager_id", referencedColumnName = "wissen_id", insertable = false, updatable = false)
+    private User manager;
+
     @Column(name = "manager_id")
     private String managerId;
 
@@ -68,5 +75,12 @@ public class User {
 
     public void setIsManager(Boolean isManager) {
         this.isManager = isManager;
+    }
+
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role != null
+                ? List.of(new SimpleGrantedAuthority(role))
+                : List.of();
     }
 }
