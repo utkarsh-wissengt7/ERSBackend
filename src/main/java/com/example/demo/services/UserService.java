@@ -34,32 +34,6 @@ public class UserService{
         this.emailService = emailService;
     }
 
-//    public User createUser(User user) throws MessagingException {
-////        user.setPassword(passwordEncoder.encode(user.getPassword())); // Encrypt password
-//        user.setPassword(user.getPassword());
-//        if (user.getReportees() == null) {
-//            user.setReportees(new ArrayList<>());
-//        }
-//        user.setReportees(new ArrayList<>(user.getReportees()));
-//
-//        User savedUser = userRepository.save(user);
-//
-//        String subject = MessageFormat.format("Welcome to Our Platform, {0}!", user.getName());
-//
-//        String bodyTemplate = """
-//        <h2>Hi {0},</h2>
-//        <p>Your account has been successfully created.</p>
-//        <p><strong>Wissen ID:</strong> {1}</p>
-//        <p>Feel free to log in and start using our services.</p>
-//        <p>Best Regards,<br/>The Team</p>
-//        """;
-//
-//        String body = MessageFormat.format(bodyTemplate, user.getName(), user.getWissenID());
-//        String email = user.getEmail();
-//        emailService.sendEmail(email, subject, body);
-//
-//        return savedUser;
-//    }
 
     public User createUser(User user) throws MessagingException, IOException {
         // Save the user
@@ -118,22 +92,6 @@ public class UserService{
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-//    public void deleteUser(String wissenID) {
-//        try {
-//            Optional<User> user = userRepository.findById(wissenID);
-//            if (user.isEmpty()) {
-//                throw new ResourceNotFoundException("User not found with ID: " + wissenID);
-//            }
-//
-//            userRepository.deleteById(wissenID);
-//        } catch (DataIntegrityViolationException e) {
-//            log.error("Cannot delete user with ID {} due to existing references", wissenID, e);
-//            throw new IllegalStateException("Cannot delete user as they have associated records");
-//        } catch (Exception e) {
-//            log.error("Error deleting user with ID: {}", wissenID, e);
-//            throw new RuntimeException("Failed to delete user");
-//        }
-//    }
     public User toggleUserActiveStatus(String wissenID) {
         User user = userRepository.findById(wissenID)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + wissenID));
