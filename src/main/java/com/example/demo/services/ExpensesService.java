@@ -77,60 +77,12 @@ public class ExpensesService {
         return savedExpense;
     }
 
-//    public Expenses approveExpense(Long expenseId) throws MessagingException, IOException {
-//        Expenses expense = expensesRepository.findById(expenseId)
-//                .orElseThrow(() -> new IllegalArgumentException("Expense not found"));
-//
-//        expense.setStatus("Approved");
-//        Expenses updatedExpense = expensesRepository.save(expense);
-//
-//        // Fetch the employee who submitted the expense
-//        User employee = userRepository.findById(expense.getUser().getWissenID())
-//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-//
-//        // Prepare email content
-//        Map<String, String> placeholders = new HashMap<>();
-//        placeholders.put("name", employee.getName());
-//        placeholders.put("expenseId", String.valueOf(updatedExpense.getId()));
-//        placeholders.put("status", "approved");
-//        placeholders.put("message", "Your expense has been approved successfully.");
-//
-//        // Send email to the employee
-//        emailService.sendEmail(employee.getEmail(), "Expense Approved", "templates/expenseEmailTemplate.html", placeholders);
-//
-//        return updatedExpense;
-//    }
-//
-//    public Expenses rejectExpense(Long expenseId, String reason) throws MessagingException, IOException {
-//        Expenses expense = expensesRepository.findById(expenseId)
-//                .orElseThrow(() -> new IllegalArgumentException("Expense not found"));
-//
-//        expense.setStatus("Rejected");
-//        expense.setReasonForRejection(reason);
-//        Expenses updatedExpense = expensesRepository.save(expense);
-//
-//        // Fetch the employee who submitted the expense
-//        User employee = userRepository.findById(expense.getUser().getWissenID())
-//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-//
-//        // Prepare email content
-//        Map<String, String> placeholders = new HashMap<>();
-//        placeholders.put("name", employee.getName());
-//        placeholders.put("expenseId", String.valueOf(updatedExpense.getId()));
-//        placeholders.put("status", "rejected");
-//        placeholders.put("message", "Reason for rejection: " + reason);
-//
-//        // Send email to the employee
-//        emailService.sendEmail(employee.getEmail(), "Expense Rejected", "templates/expenseEmailTemplate.html", placeholders);
-//
-//        return updatedExpense;
-//    }
 
     public Expenses approveExpense(Long expenseId) throws MessagingException, IOException {
         Expenses expense = expensesRepository.findById(expenseId)
                 .orElseThrow(() -> new IllegalArgumentException("Expense not found"));
 
-        expense.setStatus("Approved");
+        expense.setStatus("APPROVED");
         Expenses updatedExpense = expensesRepository.save(expense);
 
         User employee = userRepository.findById(expense.getUser().getWissenID())
@@ -151,7 +103,7 @@ public class ExpensesService {
         Expenses expense = expensesRepository.findById(expenseId)
                 .orElseThrow(() -> new IllegalArgumentException("Expense not found"));
 
-        expense.setStatus("Rejected");
+        expense.setStatus("REJECTED");
         expense.setReasonForRejection(reason);
         Expenses updatedExpense = expensesRepository.save(expense);
 

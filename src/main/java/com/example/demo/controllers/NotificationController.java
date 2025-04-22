@@ -61,11 +61,6 @@ public class NotificationController {
     }
 
 
-//    @PutMapping("/{id}")
-//    public Notification updateNotification(@PathVariable Long id, @RequestBody Notification notificationDetails) {
-//        return notificationService.updateNotification(id, notificationDetails);
-//    }
-
 
     @DeleteMapping("/{id}")
     public void deleteNotification(@PathVariable Long id) {

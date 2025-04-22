@@ -19,10 +19,6 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-//    public JwtUtil(@Value("${jwt.secret}") String secret) {
-//        System.out.println("JWT SECRET: " + secret); // Just for debugging
-//        this.key = Keys.hmacShaKeyFor(secret.getBytes());
-//    }
 
     public String generateToken(String email) {
         return Jwts.builder()
@@ -42,18 +38,6 @@ public class JwtUtil {
                 .getSubject();
     }
 
-//    public boolean validateToken(String token) {
-//        try {
-//            System.out.println("Token validation started ");
-//            Jwts.parserBuilder()
-//                    .setSigningKey(key)
-//                    .build()
-//                    .parseClaimsJws(token);
-//            return true;
-//        } catch (JwtException | IllegalArgumentException e) {
-//            return false;
-//        }
-//    }
 
     public boolean validateToken(String token) {
         try {

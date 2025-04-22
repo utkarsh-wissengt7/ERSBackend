@@ -94,36 +94,6 @@ public class ExpensesController {
         }
     }
 
-//    @PutMapping("/{id}/status/{action}")
-//    public ResponseEntity<Expenses> updateExpenseStatus(
-//            @PathVariable Long id,
-//            @PathVariable String action,
-//            @RequestParam String userId,
-//            @RequestParam String status,
-//            @RequestParam(required = false) String approvedBy,
-//            @RequestParam(required = false) String rejectedBy,
-//            @RequestParam(required = false) String reason) {
-//        try {
-//            Optional<Expenses> existingExpense = expensesService.getExpenseByIdAndUserWissenID(id, userId);
-//            if (existingExpense.isEmpty()) {
-//                return ResponseEntity.notFound().build();
-//            }
-//
-//            Expenses expense = existingExpense.get();
-//            expense.setStatus(status);
-//
-//            if ("approve".equals(action) && approvedBy != null) {
-//                expense.setApprovedBy(approvedBy);
-//            } else if ("reject".equals(action) && rejectedBy != null) {
-//                expense.setRejectedBy(rejectedBy);
-//                expense.setReasonForRejection(reason);
-//            }
-//
-//            return ResponseEntity.ok(expensesService.updateExpense(expense));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-//        }
-//    }
 
     @PutMapping("/{id}/status/{action}")
     public ResponseEntity<Expenses> updateExpenseStatus(

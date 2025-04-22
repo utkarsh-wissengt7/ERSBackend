@@ -13,7 +13,6 @@ public interface ExpensesRepository extends JpaRepository<Expenses, Long> {
     Optional<Expenses> findFirstByUser_WissenID(String wissenID);
     Optional<Expenses> findByIdAndUser_WissenID(Long id, String wissenID);
     boolean existsByIdAndUser_WissenID(Long id, String wissenID);
-//    List<Expenses> findByUser_WissenID(String wissenID);
 
     List<Expenses> findByUser_wissenID(String wissenID);
 }

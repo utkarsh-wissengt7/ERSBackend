@@ -77,28 +77,6 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-//    @PostMapping("/authenticate")
-//    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-//        Optional<User> userOptional = userRepository.findByEmailAndPassword(
-//                loginRequest.getEmail(), loginRequest.getPassword()
-//        );
-//
-//        if (userOptional.isPresent()) {
-//            User user = userOptional.get();
-//            System.out.println("User active status: " + user.isActive());  // Debug log
-//
-//            if (!user.isActive()) {
-//                Map<String, String> response = new HashMap<>();
-//                response.put("message", "Account is inactive. Please contact your administrator.");
-//                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-//            }
-//            return ResponseEntity.ok(user);
-//        }
-//
-//        Map<String, String> response = new HashMap<>();
-//        response.put("message", "Invalid credentials");
-//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-//    }
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -159,21 +137,6 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(wissenID, user));
     }
 
-//    @DeleteMapping("/{wissenID}")
-//    public ResponseEntity<?> deleteUser(@PathVariable String wissenID) {
-//        try {
-//            userService.deleteUser(wissenID);
-//            return ResponseEntity.noContent().build();
-//        } catch (ResourceNotFoundException e) {
-//            return ResponseEntity.notFound().build();
-//        } catch (IllegalStateException e) {
-//            return ResponseEntity.status(HttpStatus.CONFLICT)
-//                    .body("User cannot be deleted due to existing references");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Failed to delete user");
-//        }
-//    }
     @PutMapping("/toggle-status/{wissenID}")
     public ResponseEntity<User> toggleUserStatus(@PathVariable String wissenID) {
         try {
