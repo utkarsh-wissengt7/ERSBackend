@@ -36,13 +36,21 @@ public class UserService{
 
 
     public User createUser(User user) throws MessagingException, IOException {
+        // Check if email already exists
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists.");
+        }
+
         // Save the user
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // Initialize reportees list if null
         if (user.getReportees() == null) {
             user.setReportees(new ArrayList<>());
         }
-        user.setReportees(new ArrayList<>(user.getReportees()));
-        System.out.println(user.getReportees());
+        // No need to create a new ArrayList - we'll use the existing list
+        // Removed: user.setReportees(new ArrayList<>(user.getReportees()));
+
         User savedUser = userRepository.save(user);
 
         // Prepare email placeholders
@@ -74,18 +82,57 @@ public class UserService{
 
     public User updateUser(String wissenID, User updatedUser) {
         return userRepository.findById(wissenID).map(user -> {
+            // Check if manager is being changed
+            String oldManagerId = user.getManagerId();
+            String newManagerId = updatedUser.getManagerId();
+            boolean managerChanged = newManagerId != null && !newManagerId.equals(oldManagerId);
+
+            // Update user details
             user.setName(updatedUser.getName());
             user.setEmail(updatedUser.getEmail());
             user.setRole(updatedUser.getRole());
             user.setDateOfJoining(updatedUser.getDateOfJoining());
-            user.setManagerId(updatedUser.getManagerId());
             user.setIsManager(updatedUser.getIsManager());
             user.setReportees(updatedUser.getReportees());
 
+            // Handle password update if needed
             if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
                 if (!passwordEncoder.matches(updatedUser.getPassword(), user.getPassword())) {
                     user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
                 }
+            }
+
+            // If manager is changed, update the reportees lists of both old and new managers
+            if (managerChanged) {
+                // Remove user from old manager's reportees list if old manager exists
+                if (oldManagerId != null && !oldManagerId.isEmpty()) {
+                    userRepository.findById(oldManagerId).ifPresent(oldManager -> {
+                        List<String> oldManagerReportees = oldManager.getReportees();
+                        if (oldManagerReportees != null) {
+                            oldManagerReportees.remove(wissenID);
+                            userRepository.save(oldManager);
+                        }
+                    });
+                }
+
+                // Add user to new manager's reportees list
+                userRepository.findById(newManagerId).ifPresent(newManager -> {
+                    List<String> newManagerReportees = newManager.getReportees();
+                    if (newManagerReportees == null) {
+                        newManagerReportees = new ArrayList<>();
+                        newManager.setReportees(newManagerReportees);
+                    }
+                    if (!newManagerReportees.contains(wissenID)) {
+                        newManagerReportees.add(wissenID);
+                        userRepository.save(newManager);
+                    }
+                });
+
+                // Update the user's managerId after handling reportees
+                user.setManagerId(newManagerId);
+            } else {
+                // If manager hasn't changed, just set the managerId
+                user.setManagerId(updatedUser.getManagerId());
             }
 
             return userRepository.save(user);
