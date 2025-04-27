@@ -31,9 +31,9 @@ pipeline {
             }
             steps {
                 bat """
-                    gradlew sonarqube \
+                    gradlew clean build sonar \
                     -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=%SONAR_TOKEN%
+                    -Dsonar.token=%SONAR_TOKEN%
                 """
             }
         }
