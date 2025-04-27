@@ -9,39 +9,31 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/utkarsh-wissengt7/ERSBackend.git'
+                git branch: 'main', url: 'https://github.com/utkarsh-wissengt7/ERSBackend.git'
             }
         }
 
         stage('Build') {
             steps {
-                sh './gradlew clean build -x test'
+                bat 'gradlew clean build'  // Using bat instead of sh
             }
         }
 
         stage('Test') {
             steps {
-                sh './gradlew test'
-            }
-            post {
-                always {
-                    junit '**/build/test-results/test/*.xml'
-                }
+                bat 'gradlew test'  // Using bat instead of sh
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh './gradlew sonarqube'
-                }
+                bat 'gradlew sonarqube'  // Using bat instead of sh
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ers-backend .'
+                bat 'docker build -t ers-backend .'  // Using bat instead of sh
             }
         }
     }
