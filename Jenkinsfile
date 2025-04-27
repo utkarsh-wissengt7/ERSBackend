@@ -31,6 +31,7 @@ pipeline {
                     bat 'gradlew sonarqube'
                 }
             }
+        }
         
 
         stage('Build Docker Image') {
