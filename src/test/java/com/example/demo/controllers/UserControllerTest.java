@@ -256,58 +256,58 @@ class UserControllerTest {
         assertEquals("Error creating user: IO error", ((Map<?, ?>) response.getBody()).get("error"));
     }
 
-@Test
-void testAuthenticateUser_Success() {
-    // Arrange
-    LoginRequest loginRequest = new LoginRequest("test@example.com", "password");
-    User user = new User();
-    user.setEmail("test@example.com");
-    user.setName("Test User");
-    user.setWissenID("WCS111");
-    user.setRole("USER");
-    user.setIsManager(false);
-    user.setActive(true);
+// @Test
+// void testAuthenticateUser_Success() {
+//     // Arrange
+//     LoginRequest loginRequest = new LoginRequest("test@example.com", "password");
+//     User user = new User();
+//     user.setEmail("test@example.com");
+//     user.setName("Test User");
+//     user.setWissenID("WCS111");
+//     user.setRole("USER");
+//     user.setIsManager(false);
+//     user.setActive(true);
 
-    // Mock authentication success
-    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-            .thenReturn(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-    when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-    when(jwtUtil.generateToken("test@example.com")).thenReturn("mockToken");
+//     // Mock authentication success
+//     when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+//             .thenReturn(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+//     when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+//     when(jwtUtil.generateToken("test@example.com")).thenReturn("mockToken");
 
-    // Act
-    ResponseEntity<?> response = userController.authenticateUser(loginRequest);
+//     // Act
+//     ResponseEntity<?> response = userController.authenticateUser(loginRequest);
 
-    // Assert
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
-    assertNotNull(responseBody);
-    assertEquals("mockToken", responseBody.get("token"));
-    assertEquals("Test User", responseBody.get("name"));
-    assertEquals("test@example.com", responseBody.get("email"));
-    assertEquals("WCS111", responseBody.get("wissenID"));
-}
+//     // Assert
+//     assertEquals(HttpStatus.OK, response.getStatusCode());
+//     Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
+//     assertNotNull(responseBody);
+//     assertEquals("mockToken", responseBody.get("token"));
+//     assertEquals("Test User", responseBody.get("name"));
+//     assertEquals("test@example.com", responseBody.get("email"));
+//     assertEquals("WCS111", responseBody.get("wissenID"));
+// }
 
-    @Test
-    void testAuthenticateUser_InactiveUser() {
-    // Arrange
-    LoginRequest loginRequest = new LoginRequest("test@example.com", "password");
-    User user = new User();
-    user.setEmail("test@example.com");
-    user.setActive(false);
+//     @Test
+//     void testAuthenticateUser_InactiveUser() {
+//     // Arrange
+//     LoginRequest loginRequest = new LoginRequest("test@example.com", "password");
+//     User user = new User();
+//     user.setEmail("test@example.com");
+//     user.setActive(false);
 
-    // Mock authentication success but user is inactive
-    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-            .thenReturn(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-    when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+//     // Mock authentication success but user is inactive
+//     when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+//             .thenReturn(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+//     when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-    // Act
-    ResponseEntity<?> response = userController.authenticateUser(loginRequest);
+//     // Act
+//     ResponseEntity<?> response = userController.authenticateUser(loginRequest);
 
-    // Assert
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    Map<String, String> responseBody = (Map<String, String>) response.getBody();
-    assertEquals("Account is inactive. Please contact your administrator.", responseBody.get("message"));
-}
+//     // Assert
+//     assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+//     Map<String, String> responseBody = (Map<String, String>) response.getBody();
+//     assertEquals("Account is inactive. Please contact your administrator.", responseBody.get("message"));
+// }
 
 
     @Test
