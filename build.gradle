@@ -45,6 +45,7 @@ sonar {
         property "sonar.java.test.libraries", configurations.testRuntimeClasspath.files.collect { it.absolutePath }.join(',')
     }
 }
+tasks.sonarqube.dependsOn tasks.build
 
 repositories {
     mavenCentral()
