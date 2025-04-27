@@ -27,9 +27,11 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                bat 'gradlew sonarqube'  // Using bat instead of sh
+                withSonarQubeEnv('SonarQube') {
+                    bat 'gradlew sonarqube'
+                }
             }
-        }
+        
 
         stage('Build Docker Image') {
             steps {
