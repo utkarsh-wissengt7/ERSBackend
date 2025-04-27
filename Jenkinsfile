@@ -15,13 +15,13 @@ pipeline {
         
         stage('Build') {
             steps {
-                bat 'gradlew clean build'
+                bat 'gradlew clean build -x test'
             }
         }
         
         stage('Test') {
             steps {
-                bat 'gradlew test'
+                bat 'gradlew test jacocoTestReport'
             }
         }
         
@@ -31,9 +31,12 @@ pipeline {
             }
             steps {
                 bat """
-                    gradlew clean build sonar \
+                    gradlew sonar \
+                    -Dsonar.projectKey=ers-backend-project \
                     -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.token=%SONAR_TOKEN%
+                    -Dsonar.token=%SONAR_TOKEN% \
+                    -Dsonar.gradle.skipCompile=true \
+                    --info
                 """
             }
         }
@@ -48,6 +51,11 @@ pipeline {
     post {
         always {
             cleanWs()
+            jacoco(
+                execPattern: '**/build/jacoco/test.exec',
+                classPattern: '**/build/classes/java/main',
+                sourcePattern: '**/src/main/java'
+            )
         }
     }
 }
