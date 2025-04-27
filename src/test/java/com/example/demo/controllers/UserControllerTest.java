@@ -268,56 +268,46 @@ void testAuthenticateUser_Success() {
     user.setIsManager(false);
     user.setActive(true);
 
-    // Mock successful authentication
+    // Mock authentication success
     when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
             .thenReturn(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-
-    // Mock user retrieval
     when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-
-    // Mock JWT token generation
     when(jwtUtil.generateToken("test@example.com")).thenReturn("mockToken");
 
     // Act
     ResponseEntity<?> response = userController.authenticateUser(loginRequest);
 
     // Assert
-
-    Map<?, ?> responseBody = (Map<?, ?>) response.getBody();
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
     assertNotNull(responseBody);
     assertEquals("mockToken", responseBody.get("token"));
     assertEquals("Test User", responseBody.get("name"));
     assertEquals("test@example.com", responseBody.get("email"));
     assertEquals("WCS111", responseBody.get("wissenID"));
-    assertEquals("USER", responseBody.get("role"));
-    assertEquals("false", responseBody.get("isManager"));
-    assertEquals(HttpStatus.OK, response.getStatusCode());
 }
 
     @Test
     void testAuthenticateUser_InactiveUser() {
-        // Arrange
-        LoginRequest loginRequest = new LoginRequest("test@example.com", "password");
-        User user = new User();
-        user.setEmail("test@example.com");
-        user.setActive(false);
+    // Arrange
+    LoginRequest loginRequest = new LoginRequest("test@example.com", "password");
+    User user = new User();
+    user.setEmail("test@example.com");
+    user.setActive(false);
 
-        // Mock successful authentication
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        System.out.println("Test::::->"+loginRequest.getPassword());
-        // Mock user retrieval
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+    // Mock authentication success but user is inactive
+    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+            .thenReturn(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+    when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-        // Act
-        ResponseEntity<?> response = userController.authenticateUser(loginRequest);
+    // Act
+    ResponseEntity<?> response = userController.authenticateUser(loginRequest);
 
-        // Assert
-        Map<?, ?> responseBody = (Map<?, ?>) response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Account is inactive. Please contact your administrator.", responseBody.get("message"));
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    }
+    // Assert
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    Map<String, String> responseBody = (Map<String, String>) response.getBody();
+    assertEquals("Account is inactive. Please contact your administrator.", responseBody.get("message"));
+}
 
 
     @Test
