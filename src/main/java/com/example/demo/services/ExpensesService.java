@@ -129,14 +129,14 @@ public class ExpensesService {
         expensesRepository.deleteById(id);
     }
 
-    private void attachReceipt(Long expenseId, String pdfUrl) {
-        Optional<Expenses> optionalExpense = expensesRepository.findById(expenseId);
-        if (optionalExpense.isPresent()) {
-            Expenses expense = optionalExpense.get();
-            expense.setReceipt(pdfUrl);
-            expensesRepository.save(expense);
-        } else {
-            throw new IllegalArgumentException("Expense not found");
-        }
-    }
+//    private void attachReceipt(Long expenseId, String pdfUrl) {
+//        Optional<Expenses> optionalExpense = expensesRepository.findById(expenseId);
+//        if (optionalExpense.isPresent()) {
+//            Expenses expense = optionalExpense.get();
+//            expense.setReceipt(pdfUrl);
+//            expensesRepository.save(expense);
+//        } else {
+//            throw new IllegalArgumentException("Expense not found");
+//        }
+//    }
 }

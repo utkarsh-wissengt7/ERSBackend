@@ -42,4 +42,9 @@ public class Expenses {
     public Long getId() {
         return expenseID;
     }
+
+
+    public void setId(long l) {
+        this.expenseID = l;
+    }
 }

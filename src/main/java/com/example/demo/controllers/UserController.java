@@ -34,8 +34,6 @@ public class UserController {
     private final UserService userService;
 
 
-
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -173,24 +171,24 @@ public class UserController {
         return ResponseEntity.ok(userDetails);
     }
 
-    @PutMapping("/hash-passwords")
-    public ResponseEntity<Map<String, String>> hashAllPasswords() {
-        List<User> users = userRepository.findAll();
-        int updatedCount = 0;
-
-        for (User user : users) {
-            String password = user.getPassword();
-            // Check if the password is already hashed
-            if (!password.startsWith("$2a$")) { // BCrypt hashed passwords start with "$2a$"
-                user.setPassword(passwordEncoder.encode(password));
-                userRepository.save(user);
-                updatedCount++;
-            }
-        }
-
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Password hashing completed");
-        response.put("updatedCount", String.valueOf(updatedCount));
-        return ResponseEntity.ok(response);
-    }
+//    @PutMapping("/hash-passwords")
+//    public ResponseEntity<Map<String, String>> hashAllPasswords() {
+//        List<User> users = userRepository.findAll();
+//        int updatedCount = 0;
+//
+//        for (User user : users) {
+//            String password = user.getPassword();
+//            // Check if the password is already hashed
+//            if (!password.startsWith("$2a$")) { // BCrypt hashed passwords start with "$2a$"
+//                user.setPassword(passwordEncoder.encode(password));
+//                userRepository.save(user);
+//                updatedCount++;
+//            }
+//        }
+//
+//        Map<String, String> response = new HashMap<>();
+//        response.put("message", "Password hashing completed");
+//        response.put("updatedCount", String.valueOf(updatedCount));
+//        return ResponseEntity.ok(response);
+//    }
 }
