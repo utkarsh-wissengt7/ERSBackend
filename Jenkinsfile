@@ -22,6 +22,13 @@ pipeline {
         stage('Test') {
             steps {
                 bat 'gradlew test jacocoTestReport'
+                junit '**/build/test-results/test/*.xml'
+                recordCoverage(
+                    tools: [[parser: 'JACOCO']],
+                    sourceDirectories: [[path: 'src/main/java']],
+                    id: 'java-coverage',
+                    name: 'Java Coverage'
+                )
             }
         }
         
@@ -34,16 +41,18 @@ pipeline {
                     gradlew sonar \
                     -Dsonar.projectKey=ers-backend-project \
                     -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.token=%SONAR_TOKEN% \
-                    -Dsonar.gradle.skipCompile=true \
-                    --info
+                    -Dsonar.token=%SONAR_TOKEN%
                 """
             }
         }
         
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t ers-backend .'
+                script {
+                    bat 'docker version'  // Check if Docker is available
+                    bat 'docker info'     // Check Docker system info
+                    bat 'docker build -t ers-backend .'
+                }
             }
         }
     }
@@ -51,11 +60,12 @@ pipeline {
     post {
         always {
             cleanWs()
-            jacoco(
-                execPattern: '**/build/jacoco/test.exec',
-                classPattern: '**/build/classes/java/main',
-                sourcePattern: '**/src/main/java'
-            )
+        }
+        success {
+            echo 'Build succeeded!'
+        }
+        failure {
+            echo 'Build failed!'
         }
     }
 }
