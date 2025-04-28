@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.demo.exceptions.CloudinaryUploadException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,7 +35,7 @@ public class CloudinaryService {
                 ));
 
         if (uploadResult == null || uploadResult.get("secure_url") == null) {
-            throw new RuntimeException("Failed to get secure URL from upload response");
+            throw new CloudinaryUploadException("Failed to get secure URL from upload response");
         }
 
         return uploadResult.get("secure_url").toString();
