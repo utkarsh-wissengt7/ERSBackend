@@ -50,43 +50,6 @@ class FileUploadControllerTest {
         verify(cloudinaryService, times(1)).uploadPdf(file);
     }
 
-    // @Test
-    // void testUploadPdf_EmptyFile() throws IOException {
-    //     // Arrange
-    //     MockMultipartFile file = new MockMultipartFile(
-    //         "file",
-    //         "empty.pdf",
-    //         "application/pdf",
-    //         new byte[0]
-    //     );
-
-    //     // Act
-    //     ResponseEntity<String> response = fileUploadController.uploadPdf(file);
-
-    //     // Assert
-    //     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    //     assertEquals("Empty file", response.getBody());
-    //     verify(cloudinaryService, never()).uploadPdf(any(MultipartFile.class));
-    // }
-
-    // @Test
-    // void testUploadPdf_InvalidFileType() throws IOException {
-    //     // Arrange
-    //     MockMultipartFile file = new MockMultipartFile(
-    //         "file",
-    //         "test.txt",
-    //         "text/plain",
-    //         "test content".getBytes()
-    //     );
-
-    //     // Act
-    //     ResponseEntity<String> response = fileUploadController.uploadPdf(file);
-
-    //     // Assert
-    //     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    //     assertEquals("Only PDF files are allowed", response.getBody());
-    //     verify(cloudinaryService, never()).uploadPdf(any(MultipartFile.class));
-    // }
 
     @Test
     void testUploadPdf_UploadError() throws IOException {
@@ -108,33 +71,6 @@ class FileUploadControllerTest {
         verify(cloudinaryService, times(1)).uploadPdf(file);
     }
 
-    // @Test
-    // void testUploadPdf_NullFile() throws IOException {
-    //     // Act
-    //     ResponseEntity<String> response = fileUploadController.uploadPdf(null);
-
-    //     // Assert
-    //     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    //     assertEquals("No file provided", response.getBody());
-    //     verify(cloudinaryService, never()).uploadPdf(any(MultipartFile.class));
-    // }
-
-    // @Test
-    // void testUploadPdf_InvalidFile() throws IOException {
-    //     // Arrange
-    //     MockMultipartFile file = new MockMultipartFile(
-    //         "file",
-    //         "invalid.pdf",
-    //         "application/pdf",
-    //         "invalid content".getBytes()
-    //     );
-
-    //     // Act
-    //     ResponseEntity<String> response = fileUploadController.uploadPdf(file);
-
-    //     // Assert
-    //     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    //     assertEquals("Invalid file", response.getBody());
-    //     verify(cloudinaryService, never()).uploadPdf(any(MultipartFile.class));
-    // }
+   
+    
 }

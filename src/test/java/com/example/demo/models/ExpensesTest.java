@@ -46,28 +46,7 @@ class ExpensesTest {
         assertEquals(createdAt, expense.getCreatedAt());
     }
 
-    // @Test
-    // void testExpensesEqualsAndHashCode() {
-    //     Expenses expense1 = new Expenses();
-    //     expense1.setExpenseID(1L);
-    //     expense1.setDescription("Travel");
-
-    //     Expenses expense2 = new Expenses();
-    //     expense2.setExpenseID(1L);
-    //     expense2.setDescription("Travel");
-
-    //     Expenses expense3 = new Expenses();
-    //     expense3.setExpenseID(2L);
-    //     expense3.setDescription("Food");
-
-    //     // Test equals
-    //     assertEquals(expense1, expense2);
-    //     assertNotEquals(expense1, expense3);
-
-    //     // Test hashCode
-    //     assertEquals(expense1.hashCode(), expense2.hashCode());
-    //     assertNotEquals(expense1.hashCode(), expense3.hashCode());
-    // }
+    
 
     @Test
     void testGetId() {

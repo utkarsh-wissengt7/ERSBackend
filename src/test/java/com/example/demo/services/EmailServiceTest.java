@@ -69,21 +69,7 @@ class EmailServiceTest {
         });
     }
 
-    // @Test
-    // void testSendEmail_MessagingException() throws MessagingException {
-    //     // Arrange
-    //     doThrow(new MessagingException("Failed to send email"))
-    //         .when(mailSender).send(any(MimeMessage.class));
-
-    //     Map<String, String> placeholders = new HashMap<>();
-    //     placeholders.put("name", "John Doe");
-    //     placeholders.put("status", "approved");
-
-    //     // Act & Assert
-    //     assertThrows(MessagingException.class, () -> {
-    //         emailService.sendEmail("test@example.com", "Subject", "templates/emailTemplate.html", placeholders);
-    //     });
-    // }
+   
 
     @Test
     void testSendEmailWithMultiplePlaceholders() throws MessagingException, IOException {

@@ -55,34 +55,7 @@ class NotificationTest {
         assertEquals("New expense submitted", notification.getMessage());
     }
 
-    // @Test
-    // void testNotificationEqualsAndHashCode() {
-    //     Notification notification1 = Notification.builder()
-    //             .id(1L)
-    //             .userId("WCS171")
-    //             .status("PENDING")
-    //             .build();
-
-    //     Notification notification2 = Notification.builder()
-    //             .id(1L)
-    //             .userId("WCS171")
-    //             .status("PENDING")
-    //             .build();
-
-    //     Notification notification3 = Notification.builder()
-    //             .id(2L)
-    //             .userId("WCS172")
-    //             .status("APPROVED")
-    //             .build();
-
-    //     // Test equals
-    //     assertEquals(notification1, notification2);
-    //     assertNotEquals(notification1, notification3);
-
-    //     // Test hashCode
-    //     assertEquals(notification1.hashCode(), notification2.hashCode());
-    //     assertNotEquals(notification1.hashCode(), notification3.hashCode());
-    // }
+   
 
     @Test
     void testPrePersist() {

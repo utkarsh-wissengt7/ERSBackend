@@ -47,28 +47,7 @@ class UserTest {
         assertEquals("WCS172", user.getReportees().get(0));
     }
 
-    // @Test
-    // void testUserEqualsAndHashCode() {
-    //     User user1 = new User();
-    //     user1.setWissenID("WCS171");
-    //     user1.setEmail("john@example.com");
-
-    //     User user2 = new User();
-    //     user2.setWissenID("WCS171");
-    //     user2.setEmail("john@example.com");
-
-    //     User user3 = new User();
-    //     user3.setWissenID("WCS172");
-    //     user3.setEmail("jane@example.com");
-
-    //     // Test equals
-    //     assertEquals(user1, user2);
-    //     assertNotEquals(user1, user3);
-
-    //     // Test hashCode
-    //     assertEquals(user1.hashCode(), user2.hashCode());
-    //     assertNotEquals(user1.hashCode(), user3.hashCode());
-    // }
+    
 
     @Test
     void testUserAuthorities() {

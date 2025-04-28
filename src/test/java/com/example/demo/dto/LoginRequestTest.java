@@ -81,15 +81,5 @@ class LoginRequestTest {
         assertEquals("password123", request.getPassword());
     }
 
-    // @Test
-    // void testLoginRequestEqualsAndHashCode() {
-    //     LoginRequest request1 = new LoginRequest("test@example.com", "password123");
-    //     LoginRequest request2 = new LoginRequest("test@example.com", "password123");
-    //     LoginRequest request3 = new LoginRequest("other@example.com", "password456");
-
-    //     assertEquals(request1, request2);
-    //     assertNotEquals(request1, request3);
-    //     assertEquals(request1.hashCode(), request2.hashCode());
-    //     assertNotEquals(request1.hashCode(), request3.hashCode());
-    // }
+    
 }

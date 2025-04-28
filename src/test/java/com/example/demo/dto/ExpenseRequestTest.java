@@ -32,22 +32,9 @@ class ExpenseRequestTest {
         assertEquals("receipt.pdf", request.getReceipt());
     }
 
-    // @Test
-    // void testExpenseRequestMissingRequiredFields() {
-    //     ExpenseRequest request = new ExpenseRequest();
-    //     assertFalse(validator.validate(request).isEmpty());
-    // }
+    
 
-    // @Test
-    // void testExpenseRequestInvalidAmount() {
-    //     ExpenseRequest request = new ExpenseRequest();
-    //     request.setUserId("WCS171");
-    //     request.setCategory("Travel");
-    //     request.setAmount(-100.0); // Negative amount
-    //     request.setDescription("Business trip expenses");
-
-    //     assertFalse(validator.validate(request).isEmpty());
-    // }
+   
 
     @Test
     void testExpenseRequestEquality() {
