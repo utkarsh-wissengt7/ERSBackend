@@ -92,15 +92,28 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testDeleteNotification() {
-        // Mock findById to return the notification
-        when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+    void testDeleteNotification_ExistingNotification() {
+        // Arrange
+        when(notificationRepository.existsById(1L)).thenReturn(true);
         doNothing().when(notificationRepository).deleteById(1L);
 
-        notificationService.deleteNotification(1L);
-
-        verify(notificationRepository, times(1)).findById(1L);
+        // Act & Assert - should not throw exception
+        assertDoesNotThrow(() -> notificationService.deleteNotification(1L));
+        verify(notificationRepository, times(1)).existsById(1L);
         verify(notificationRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void testDeleteNotification_NonExistingNotification() {
+        // Arrange
+        when(notificationRepository.existsById(999L)).thenReturn(false);
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, 
+            () -> notificationService.deleteNotification(999L));
+        assertEquals("Notification not found", exception.getMessage());
+        verify(notificationRepository, times(1)).existsById(999L);
+        verify(notificationRepository, never()).deleteById(999L);
     }
 
     @Test
