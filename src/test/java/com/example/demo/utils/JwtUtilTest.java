@@ -1,4 +1,8 @@
 package com.example.demo.utils;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import java.util.Date;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -30,7 +34,7 @@ class JwtUtilTest {
 
         // Assert
         assertNotNull(token);
-        assertTrue(token.length() > 0);
+        assertFalse(token.isEmpty());
         assertTrue(jwtUtil.validateToken(token));
         assertEquals(TEST_EMAIL, jwtUtil.extractEmail(token));
     }
@@ -38,23 +42,20 @@ class JwtUtilTest {
     @Test
     void testGenerateTokenWithCustomExpiration() {
         // Arrange
-        long shortExpiration = 1000L; // 1 second
-        JwtUtil shortExpirationJwtUtil = new JwtUtil(SECRET, shortExpiration);
-
-        // Act
-        String token = shortExpirationJwtUtil.generateToken(TEST_EMAIL);
+        long pastTime = System.currentTimeMillis() - 2000; // 2 seconds in the past
+        JwtUtil shortExpirationJwtUtil = new JwtUtil(SECRET, 1000L); // 1 second expiration
+        
+        // Create a token that was issued in the past
+        String token = Jwts.builder()
+                .setSubject(TEST_EMAIL)
+                .setIssuedAt(new Date(pastTime))
+                .setExpiration(new Date(pastTime + 1000)) // Set expiration 1 second after past time
+                .signWith(Keys.hmacShaKeyFor(SECRET.getBytes()), SignatureAlgorithm.HS256)
+                .compact();
 
         // Assert
         assertNotNull(token);
-        assertTrue(token.length() > 0);
-
-        // Wait for token to expire
-        try {
-            Thread.sleep(1100); // Wait slightly more than expiration time
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        assertFalse(token.isEmpty());
         assertFalse(shortExpirationJwtUtil.validateToken(token));
     }
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 @Component
@@ -17,6 +18,7 @@ public class JwtUtil {
     private final long expirationTime;
     private static final long DEFAULT_EXPIRATION_TIME = 1000L * 60 * 60; // 1 hour
 
+    @Autowired
     public JwtUtil(@Value("${jwt.secret}") String secret) {
         this(secret, DEFAULT_EXPIRATION_TIME);
     }

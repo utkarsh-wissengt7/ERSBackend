@@ -42,14 +42,6 @@ class StringListConverterTest {
         assertEquals("[]", result);
     }
 
-    // @Test
-    // void testConvertToDatabaseColumn_NullList() {
-    //     // Act
-    //     String result = converter.convertToDatabaseColumn(null);
-
-    //     // Assert
-    //     assertEquals("[]", result);
-    // }
 
     @Test
     void testConvertToEntityAttribute_ValidJson() {
@@ -90,12 +82,4 @@ class StringListConverterTest {
         assertTrue(result.isEmpty());
     }
 
-    // @Test
-    // void testConvertToEntityAttribute_NullInput() {
-    //     // Act
-    //     List<String> result = converter.convertToEntityAttribute(null);
-
-    //     // Assert
-    //     assertTrue(result.isEmpty());
-    // }
 }
