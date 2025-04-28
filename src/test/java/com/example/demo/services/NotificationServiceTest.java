@@ -93,10 +93,13 @@ class NotificationServiceTest {
 
     @Test
     void testDeleteNotification() {
+        // Mock findById to return the notification
+        when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
         doNothing().when(notificationRepository).deleteById(1L);
 
         notificationService.deleteNotification(1L);
 
+        verify(notificationRepository, times(1)).findById(1L);
         verify(notificationRepository, times(1)).deleteById(1L);
     }
 
