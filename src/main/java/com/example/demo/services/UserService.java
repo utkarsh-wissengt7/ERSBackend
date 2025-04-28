@@ -48,8 +48,6 @@ public class UserService{
         if (user.getReportees() == null) {
             user.setReportees(new ArrayList<>());
         }
-        // No need to create a new ArrayList - we'll use the existing list
-        // Removed: user.setReportees(new ArrayList<>(user.getReportees()));
 
         User savedUser = userRepository.save(user);
 
@@ -75,10 +73,6 @@ public class UserService{
         return userRepository.findByRoleNot("ADMIN");
     }
 
-//    public Optional<User> authenticateUser(String email, String password) {
-//        return userRepository.findByEmail(email)
-//                .filter(user -> passwordEncoder.matches(password, user.getPassword()));
-//    }
 
     public User updateUser(String wissenID, User updatedUser) {
         return userRepository.findById(wissenID).map(user -> {
@@ -146,28 +140,5 @@ public class UserService{
         return userRepository.save(user);
     }
 
-//    public User createOrUpdateOAuth2User(OAuth2User oAuth2User) {
-//        String email=oAuth2User.getAttribute("email");
-//        User user = userRepository.findByEmail(email).orElse(new User());
-//
-//        user.setName(oAuth2User.getAttribute("name"));
-//        user.setEmail(email);
-//        user.setActive(true);
-//        user.setRole("USER");
-//
-//        return userRepository.save(user);
-//    }
-
-//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        // Fetch the user from the database
-//        User user = userRepository.findByEmail(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-//
-//        // Convert the user to a UserDetails object
-//        return new org.springframework.security.core.userdetails.User(
-//                user.getEmail(),
-//                user.getPassword(),
-//                Collections.emptyList() // Replace with actual authorities if needed
-//        );
-//    }
+//    
 }

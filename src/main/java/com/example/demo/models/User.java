@@ -3,7 +3,6 @@ package com.example.demo.models;
 import com.example.demo.converters.StringListConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-//import io.hypersistence.utils.hibernate.type.json.JsonType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;

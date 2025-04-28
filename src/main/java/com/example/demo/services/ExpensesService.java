@@ -27,8 +27,11 @@ public class ExpensesService {
     @Autowired
     private EmailService emailService;
 
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String EXPENSE_ID_KEY = "expenseId";
+    private static final String EXPENSE_STATUS_KEY = "status";
+
     public List<Expenses> getExpensesByUserWissenID(String wissenID) {
-        System.out.println("Fetching expenses for user with WissenID: " + wissenID);
         return expensesRepository.findByUser_wissenID(wissenID);
     }
 
@@ -53,7 +56,7 @@ public class ExpensesService {
 
         // Fetch the employee who submitted the expense
         User employee = userRepository.findById(expense.getUser().getWissenID())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         // Fetch the manager of the employee
         User manager = employee
@@ -66,10 +69,10 @@ public class ExpensesService {
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("name", manager.getName());
         placeholders.put("employeeName", employee.getName());
-        placeholders.put("expenseId", String.valueOf(savedExpense.getId()));
+        placeholders.put(EXPENSE_ID_KEY, String.valueOf(savedExpense.getId()));
         placeholders.put("category", savedExpense.getCategory());
         placeholders.put("amount", String.valueOf(savedExpense.getAmount()));
-        placeholders.put("status", savedExpense.getStatus());
+        placeholders.put(EXPENSE_STATUS_KEY, savedExpense.getStatus());
 
         // Send email to the manager
         emailService.sendEmail(manager.getEmail(), "New Expense Submission", "templates/newExpenseTemplate.html", placeholders);
@@ -86,12 +89,12 @@ public class ExpensesService {
         Expenses updatedExpense = expensesRepository.save(expense);
 
         User employee = userRepository.findById(expense.getUser().getWissenID())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("name", employee.getName());
-        placeholders.put("expenseId", String.valueOf(updatedExpense.getId()));
-        placeholders.put("status", "approved");
+        placeholders.put(EXPENSE_ID_KEY, String.valueOf(updatedExpense.getId()));
+        placeholders.put(EXPENSE_STATUS_KEY, "approved");
         placeholders.put("message", "Your expense has been approved successfully.");
 
         emailService.sendEmail(employee.getEmail(), "Expense Approved", "templates/expenseEmailTemplate.html", placeholders);
@@ -108,12 +111,12 @@ public class ExpensesService {
         Expenses updatedExpense = expensesRepository.save(expense);
 
         User employee = userRepository.findById(expense.getUser().getWissenID())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("name", employee.getName());
-        placeholders.put("expenseId", String.valueOf(updatedExpense.getId()));
-        placeholders.put("status", "rejected");
+        placeholders.put(EXPENSE_ID_KEY, String.valueOf(updatedExpense.getId()));
+        placeholders.put(EXPENSE_STATUS_KEY, "rejected");
         placeholders.put("message", "Reason for rejection: " + reason);
 
         emailService.sendEmail(employee.getEmail(), "Expense Rejected", "templates/expenseEmailTemplate.html", placeholders);
@@ -129,14 +132,4 @@ public class ExpensesService {
         expensesRepository.deleteById(id);
     }
 
-//    private void attachReceipt(Long expenseId, String pdfUrl) {
-//        Optional<Expenses> optionalExpense = expensesRepository.findById(expenseId);
-//        if (optionalExpense.isPresent()) {
-//            Expenses expense = optionalExpense.get();
-//            expense.setReceipt(pdfUrl);
-//            expensesRepository.save(expense);
-//        } else {
-//            throw new IllegalArgumentException("Expense not found");
-//        }
-//    }
 }

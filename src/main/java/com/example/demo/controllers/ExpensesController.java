@@ -25,7 +25,6 @@ public class ExpensesController {
 
     @GetMapping("/user")
     public List<Expenses> getAllExpensesByUserWissenID(@RequestParam String userId) {
-        System.out.println("i am getting called in getAllExpensesByUserWissenID");
         return expensesService.getExpensesByUserWissenID(userId);
     }
 

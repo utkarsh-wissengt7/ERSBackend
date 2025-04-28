@@ -53,7 +53,6 @@ class EmailServiceTest {
         emailService.sendEmail("test@example.com", "Welcome", templatePath, placeholders);
 
         // Assert
-        ArgumentCaptor<MimeMessageHelper> captor = ArgumentCaptor.forClass(MimeMessageHelper.class);
         verify(mailSender, times(1)).send(mimeMessage);
     }
 

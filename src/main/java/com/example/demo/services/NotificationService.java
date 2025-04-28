@@ -1,8 +1,6 @@
 package com.example.demo.services;
 
 import com.example.demo.models.Notification;
-import com.example.demo.models.User;
-import com.example.demo.models.Expenses;
 import com.example.demo.repositories.NotificationRepository;
 import com.example.demo.repositories.UserRepository;
 import com.example.demo.repositories.ExpensesRepository;

@@ -13,7 +13,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -31,15 +33,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
                     throws ServletException, IOException {
                 String authHeader = request.getHeader("Authorization");
-                System.out.println("Checking token received from headers: " + authHeader);
+                log.info("Checking token received from headers: " + authHeader);
 
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     String token = authHeader.substring(7); // ✅ Remove "Bearer " prefix
-                    System.out.println("Token after stripping prefix: " + token);
+                    log.info("Token after stripping prefix: " + token);
 
                     if (jwtUtil.validateToken(token)) {
                         String email = jwtUtil.extractEmail(token);
-                        System.out.println("Extracted email: " + email);
+                        log.info("Extracted email: " + email);
 
                         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
@@ -48,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     } else {
-                        System.out.println("Invalid token!");
+                        log.info("Invalid token!");
                     }
                 }
 

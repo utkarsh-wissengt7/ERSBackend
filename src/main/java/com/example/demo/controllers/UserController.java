@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users/")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -33,7 +35,6 @@ public class UserController {
     private UserRepository userRepository;
     private final UserService userService;
 
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -42,6 +43,10 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    private static final String ERROR_KEY = "error";
+    private static final String EMAIL_KEY = "email";
+    private static final String MESSAGE_KEY = "message";
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -54,11 +59,11 @@ public class UserController {
             return ResponseEntity.ok(newUser);
         } catch (IllegalArgumentException e) {
             Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
+            response.put(ERROR_KEY, e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         } catch (MessagingException | IOException e) {
             Map<String, String> response = new HashMap<>();
-            response.put("error", "Error creating user: " + e.getMessage());
+            response.put(ERROR_KEY, "Error creating user: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -81,7 +86,7 @@ public class UserController {
                 .map(user -> ResponseEntity.ok(Map.of(
                         "wissenID", user.getWissenID(),
                         "name", user.getName(),
-                        "email", user.getEmail()
+                        EMAIL_KEY, user.getEmail()
                 )))
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -91,11 +96,11 @@ public class UserController {
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
 
-            System.out.println("i am getting called in authentication ");
+            log.info("i am getting called in authentication ");
 
             // Authenticate the user
-            System.out.println(loginRequest.getEmail());
-            System.out.println(loginRequest.getPassword());
+            log.info(loginRequest.getEmail());
+            log.info(loginRequest.getPassword());
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
@@ -108,7 +113,7 @@ public class UserController {
                 // Check if the user is active
                 if (!user.isActive()) {
                     Map<String, String> response = new HashMap<>();
-                    response.put("message", "Account is inactive. Please contact your administrator.");
+                    response.put(MESSAGE_KEY, "Account is inactive. Please contact your administrator.");
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
                 }
 
@@ -119,7 +124,7 @@ public class UserController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("token", token);
                 response.put("name",user.getName());
-                response.put("email",user.getEmail());
+                response.put(EMAIL_KEY,user.getEmail());
                 response.put("wissenID" , user.getWissenID());
                 response.put("role", user.getRole());
                 response.put("isManager", String.valueOf(user.getIsManager()));
@@ -129,13 +134,13 @@ public class UserController {
 
             // If user is not found
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Invalid credentials");
+            response.put(MESSAGE_KEY, "Invalid credentials");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (Exception e) {
             // Handle authentication failure
-            System.out.println("Authentication failed: " + e.getMessage());
+            log.info("Authentication failed: " + e.getMessage());
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Invalid email or password");
+            response.put(MESSAGE_KEY, "Invalid email or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
@@ -162,33 +167,14 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getAuthenticatedUser(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not authenticated"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(ERROR_KEY, "User not authenticated"));
         }
         Map<String, Object> userDetails = Map.of(
                 "name", principal.getAttribute("name"),
-                "email", principal.getAttribute("email")
+                EMAIL_KEY, principal.getAttribute(EMAIL_KEY)
         );
         return ResponseEntity.ok(userDetails);
     }
 
-//    @PutMapping("/hash-passwords")
-//    public ResponseEntity<Map<String, String>> hashAllPasswords() {
-//        List<User> users = userRepository.findAll();
-//        int updatedCount = 0;
-//
-//        for (User user : users) {
-//            String password = user.getPassword();
-//            // Check if the password is already hashed
-//            if (!password.startsWith("$2a$")) { // BCrypt hashed passwords start with "$2a$"
-//                user.setPassword(passwordEncoder.encode(password));
-//                userRepository.save(user);
-//                updatedCount++;
-//            }
-//        }
-//
-//        Map<String, String> response = new HashMap<>();
-//        response.put("message", "Password hashing completed");
-//        response.put("updatedCount", String.valueOf(updatedCount));
-//        return ResponseEntity.ok(response);
-//    }
+
 }
