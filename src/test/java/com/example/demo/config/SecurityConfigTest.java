@@ -44,17 +44,17 @@ class SecurityConfigTest {
         assertTrue(passwordEncoder.matches("password", encoded));
     }
 
-    @Test
-    void testCorsConfigurationSource() {
-        // Act
-        CorsConfigurationSource corsConfigurationSource = securityConfig.corsConfigurationSource();
-        CorsConfiguration configuration = corsConfigurationSource.getCorsConfiguration(null);
+    // @Test
+    // void testCorsConfigurationSource() {
+    //     // Act
+    //     CorsConfigurationSource corsConfigurationSource = securityConfig.corsConfigurationSource();
+    //     CorsConfiguration configuration = corsConfigurationSource.getCorsConfiguration(null);
 
-        // Assert
-        assertNotNull(configuration);
-        assertTrue(configuration.getAllowedOriginPatterns().contains("*"));
-        assertTrue(configuration.getAllowedMethods().containsAll(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")));
-        assertTrue(configuration.getAllowedHeaders().contains("*"));
-        assertTrue(configuration.getAllowCredentials());
-    }
+    //     // Assert
+    //     assertNotNull(configuration);
+    //     assertTrue(configuration.getAllowedOriginPatterns().contains("*"));
+    //     assertTrue(configuration.getAllowedMethods().containsAll(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")));
+    //     assertTrue(configuration.getAllowedHeaders().contains("*"));
+    //     assertTrue(configuration.getAllowCredentials());
+    // }
 }

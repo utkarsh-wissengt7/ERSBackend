@@ -107,11 +107,11 @@ class ExpensesControllerTest {
     @Test
     void testCreateExpense_Success() throws MessagingException, IOException {
         ExpenseRequest request = new ExpenseRequest();
+        request.setUserId("WCS171");
         request.setCategory("Travel");
         request.setAmount(100.0);
         request.setDescription("Business trip");
-        request.setUserId("WCS171");
-
+        
         Expenses expense = new Expenses();
         when(expensesService.createExpense(any(Expenses.class))).thenReturn(expense);
 
@@ -124,10 +124,10 @@ class ExpensesControllerTest {
     @Test
     void testCreateExpense_Exception() throws MessagingException, IOException {
         ExpenseRequest request = new ExpenseRequest();
+        request.setUserId("WCS171");
         request.setCategory("Travel");
         request.setAmount(100.0);
         request.setDescription("Business trip");
-        request.setUserId("WCS171");
 
         when(expensesService.createExpense(any(Expenses.class))).thenThrow(new RuntimeException("Error"));
 
@@ -143,14 +143,14 @@ class ExpensesControllerTest {
         request.setAmount(50.0);
         request.setDescription("Lunch");
 
-        Expenses expense = new Expenses();
-        when(expensesService.getExpenseByIdAndUserWissenID(1L, "WCS171")).thenReturn(Optional.of(expense));
-        when(expensesService.updateExpense(any(Expenses.class))).thenReturn(expense);
+        Expenses existingExpense = new Expenses();
+        when(expensesService.getExpenseByIdAndUserWissenID(1L, "WCS171")).thenReturn(Optional.of(existingExpense));
+        when(expensesService.updateExpense(any(Expenses.class))).thenReturn(existingExpense);
 
         ResponseEntity<Expenses> response = expensesController.updateExpense(1L, "WCS171", request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expense, response.getBody());
+        assertEquals(existingExpense, response.getBody());
     }
 
     @Test

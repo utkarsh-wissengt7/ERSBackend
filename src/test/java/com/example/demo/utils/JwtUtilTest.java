@@ -53,9 +53,8 @@ class JwtUtilTest {
 
     @Test
     void testValidateToken_ExpiredToken() throws Exception {
-        // Create a JwtUtil with very short expiration
-        JwtUtil shortJwtUtil = new JwtUtil(SECRET);
-        ReflectionTestUtils.setField(shortJwtUtil, "EXPIRATION_TIME", 1); // 1ms expiration
+        // Create a JwtUtil with very short expiration (1ms)
+        JwtUtil shortJwtUtil = new JwtUtil(SECRET, 1);
         
         String token = shortJwtUtil.generateToken("test@example.com");
         Thread.sleep(2); // Wait for token to expire

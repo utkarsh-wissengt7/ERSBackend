@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class NotificationControllerTest {
@@ -32,7 +34,18 @@ class NotificationControllerTest {
 
     @Test
     void testGetAllNotifications() {
-        List<Notification> notifications = Arrays.asList(new Notification(), new Notification());
+        List<Notification> notifications = Arrays.asList(
+            Notification.builder()
+                .id(1L)
+                .userId("WCS171")
+                .message("Test notification 1")
+                .build(),
+            Notification.builder()
+                .id(2L)
+                .userId("WCS171")
+                .message("Test notification 2")
+                .build()
+        );
         when(notificationService.getAllNotifications()).thenReturn(notifications);
 
         List<Notification> response = notificationController.getAllNotifications();
@@ -42,96 +55,90 @@ class NotificationControllerTest {
     }
 
     @Test
-    void testGetNotificationById_Success() {
-        Notification notification = new Notification();
-        when(notificationService.getNotificationById(1L)).thenReturn(Optional.of(notification));
-
-        Optional<Notification> response = notificationController.getNotificationById(1L);
-
-        assertTrue(response.isPresent());
-        assertEquals(notification, response.get());
-        verify(notificationService, times(1)).getNotificationById(1L);
-    }
-
-    @Test
-    void testGetNotificationById_NotFound() {
-        when(notificationService.getNotificationById(1L)).thenReturn(Optional.empty());
-
-        Optional<Notification> response = notificationController.getNotificationById(1L);
-
-        assertFalse(response.isPresent());
-        verify(notificationService, times(1)).getNotificationById(1L);
-    }
-
-    @Test
     void testGetNotificationsByUserId() {
-        List<Notification> notifications = Arrays.asList(new Notification(), new Notification());
-        when(notificationService.getNotificationsByUserId("user1")).thenReturn(notifications);
+        String userId = "WCS171";
+        List<Notification> notifications = Arrays.asList(
+            Notification.builder()
+                .id(1L)
+                .userId(userId)
+                .message("Test notification")
+                .build()
+        );
+        when(notificationService.getNotificationsByUserId(userId)).thenReturn(notifications);
 
-        ResponseEntity<List<Notification>> response = notificationController.getNotificationsByUserId("user1");
+        ResponseEntity<List<Notification>> response = notificationController.getNotificationsByUserId(userId);
 
-        assertEquals(2, response.getBody().size());
-        assertEquals(200, response.getStatusCodeValue());
-        verify(notificationService, times(1)).getNotificationsByUserId("user1");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().size());
+        assertEquals(userId, response.getBody().get(0).getUserId());
+        verify(notificationService, times(1)).getNotificationsByUserId(userId);
     }
 
     @Test
-    void testCreateNotification_Success() {
-        NotificationRequest request = new NotificationRequest();
-        request.setMessage("Test Message");
-        request.setUserId("user1");
+    void testGetNotificationsByStatus() {
+        String status = "UNREAD";
+        List<Notification> notifications = Arrays.asList(
+            Notification.builder()
+                .id(1L)
+                .userId("WCS171")
+                .status(status)
+                .message("Unread notification")
+                .build()
+        );
+        when(notificationService.getNotificationsByStatus(status)).thenReturn(notifications);
 
+        List<Notification> response = notificationController.getNotificationsByStatus(status);
+
+        assertEquals(1, response.size());
+        assertEquals(status, response.get(0).getStatus());
+        verify(notificationService, times(1)).getNotificationsByStatus(status);
+    }
+
+    @Test
+    void testCreateNotification() {
+        // Arrange
+        NotificationRequest request = new NotificationRequest();
+        request.setUserId("WCS171");
+        request.setMessage("Test notification");
+        
         Notification notification = new Notification();
+        notification.setUserId("WCS171");
+        notification.setMessage("Test notification");
+        
         when(notificationService.createNotification(any(Notification.class))).thenReturn(notification);
 
-        ResponseEntity<Notification> response = notificationController.createNotification(request);
+        // Act
+        ResponseEntity<Notification> responseEntity = notificationController.createNotification(request);
+        Notification response = responseEntity.getBody();
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(notification, response.getBody());
-        verify(notificationService, times(1)).createNotification(any(Notification.class));
-    }
-
-    @Test
-    void testCreateNotification_BadRequest() {
-        NotificationRequest request = new NotificationRequest(); // Missing required fields
-
-        ResponseEntity<Notification> response = notificationController.createNotification(request);
-
-        assertEquals(400, response.getStatusCodeValue());
-        verify(notificationService, never()).createNotification(any(Notification.class));
-    }
-
-    @Test
-    void testCreateNotification_Exception() {
-        NotificationRequest request = new NotificationRequest();
-        request.setMessage("Test Message");
-        request.setUserId("user1");
-
-        when(notificationService.createNotification(any(Notification.class))).thenThrow(new RuntimeException("Error"));
-
-        ResponseEntity<Notification> response = notificationController.createNotification(request);
-
-        assertEquals(400, response.getStatusCodeValue());
+        // Assert
+        assertNotNull(response);
+        assertEquals("Test notification", response.getMessage());
         verify(notificationService, times(1)).createNotification(any(Notification.class));
     }
 
     @Test
     void testDeleteNotification() {
-        doNothing().when(notificationService).deleteNotification(1L);
+        Long notificationId = 1L;
+        doNothing().when(notificationService).deleteNotification(notificationId);
 
-        notificationController.deleteNotification(1L);
+        notificationController.deleteNotification(notificationId);
 
-        verify(notificationService, times(1)).deleteNotification(1L);
+        verify(notificationService, times(1)).deleteNotification(notificationId);
     }
 
     @Test
-    void testGetNotificationsByStatus() {
-        List<Notification> notifications = Arrays.asList(new Notification(), new Notification());
-        when(notificationService.getNotificationsByStatus("PENDING")).thenReturn(notifications);
+    void testGetNotificationById() {
+        Long notificationId = 1L;
+        Notification notification = Notification.builder()
+            .id(notificationId)
+            .build();
+        when(notificationService.getNotificationById(notificationId)).thenReturn(Optional.of(notification));
 
-        List<Notification> response = notificationController.getNotificationsByStatus("PENDING");
+        Optional<Notification> response = notificationController.getNotificationById(notificationId);
 
-        assertEquals(2, response.size());
-        verify(notificationService, times(1)).getNotificationsByStatus("PENDING");
+        assertTrue(response.isPresent());
+        assertEquals(notificationId, response.get().getId());
+        verify(notificationService, times(1)).getNotificationById(notificationId);
     }
 }

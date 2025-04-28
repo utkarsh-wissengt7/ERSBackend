@@ -14,18 +14,23 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtUtil {
 
     private final Key key;
-    private static final long EXPIRATION_TIME = 1000L * 60 * 60; // 1 hour
+    private final long expirationTime;
+    private static final long DEFAULT_EXPIRATION_TIME = 1000L * 60 * 60; // 1 hour
 
     public JwtUtil(@Value("${jwt.secret}") String secret) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        this(secret, DEFAULT_EXPIRATION_TIME);
     }
 
+    public JwtUtil(String secret, long expirationTime) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        this.expirationTime = expirationTime;
+    }
 
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -38,7 +43,6 @@ public class JwtUtil {
                 .getBody()
                 .getSubject();
     }
-
 
     public boolean validateToken(String token) {
         try {

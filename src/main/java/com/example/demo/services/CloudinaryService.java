@@ -18,11 +18,25 @@ public class CloudinaryService {
     }
 
     public String uploadPdf(MultipartFile file) throws IOException {
-        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+        
+        byte[] content = file.getBytes();
+        if (content.length == 0) {
+            throw new IllegalArgumentException("File cannot be empty");
+        }
+
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(content,
                 ObjectUtils.asMap(
                         "resource_type", "raw",  // "raw" is needed for PDFs
                         "folder", "pdf-uploads"
                 ));
+
+        if (uploadResult == null || uploadResult.get("secure_url") == null) {
+            throw new RuntimeException("Failed to get secure URL from upload response");
+        }
+
         return uploadResult.get("secure_url").toString();
     }
 }
