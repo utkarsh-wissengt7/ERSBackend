@@ -6,14 +6,17 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class JwtUtilTest {
 
     private JwtUtil jwtUtil;
-    private static final String SECRET = "VGhpcyBpcyBhIHZhbGlkIHNlY3JldCBrZXk=";
+    private static final String SECRET = "thisIsAVeryLongSecretKeyForTestingPurposesOnly12345";
+    private static final String TEST_EMAIL = "test@example.com";
 
     @BeforeEach
     void setUp() {
@@ -22,48 +25,86 @@ class JwtUtilTest {
 
     @Test
     void testGenerateToken() {
-        String email = "test@example.com";
-        String token = jwtUtil.generateToken(email);
-        
+        // Act
+        String token = jwtUtil.generateToken(TEST_EMAIL);
+
+        // Assert
         assertNotNull(token);
         assertTrue(token.length() > 0);
         assertTrue(jwtUtil.validateToken(token));
-        assertEquals(email, jwtUtil.extractEmail(token));
+        assertEquals(TEST_EMAIL, jwtUtil.extractEmail(token));
+    }
+
+    @Test
+    void testGenerateTokenWithCustomExpiration() {
+        // Arrange
+        long shortExpiration = 1000L; // 1 second
+        JwtUtil shortExpirationJwtUtil = new JwtUtil(SECRET, shortExpiration);
+
+        // Act
+        String token = shortExpirationJwtUtil.generateToken(TEST_EMAIL);
+
+        // Assert
+        assertNotNull(token);
+        assertTrue(token.length() > 0);
+
+        // Wait for token to expire
+        try {
+            Thread.sleep(1100); // Wait slightly more than expiration time
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertFalse(shortExpirationJwtUtil.validateToken(token));
+    }
+
+    @Test
+    void testValidateToken_ExpiredToken() {
+        // Arrange
+        JwtUtil shortExpirationJwtUtil = new JwtUtil(SECRET, 0); // Immediate expiration
+        String token = shortExpirationJwtUtil.generateToken(TEST_EMAIL);
+
+        // Act & Assert
+        assertFalse(shortExpirationJwtUtil.validateToken(token));
+    }
+
+    @Test
+    void testValidateToken_MalformedToken() {
+        // Act & Assert
+        assertFalse(jwtUtil.validateToken("malformed.jwt.token"));
+    }
+
+    @Test
+    void testValidateToken_UnsupportedToken() {
+        // Act & Assert
+        assertFalse(jwtUtil.validateToken("eyJhbGciOiJub25lIn0.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIn0."));
+    }
+
+    @Test
+    void testValidateToken_InvalidSignature() {
+        // Arrange
+        String differentSecret = "anotherVeryLongSecretKeyForTestingPurposesOnly98765432100";
+        String tokenWithDifferentSecret = new JwtUtil(differentSecret).generateToken(TEST_EMAIL);
+
+        // Act & Assert
+        assertFalse(jwtUtil.validateToken(tokenWithDifferentSecret));
+    }
+
+    @Test
+    void testValidateToken_NullToken() {
+        // Act & Assert
+        assertFalse(jwtUtil.validateToken(null));
     }
 
     @Test
     void testExtractEmail() {
-        String email = "test@example.com";
-        String token = jwtUtil.generateToken(email);
-        
+        // Arrange
+        String token = jwtUtil.generateToken(TEST_EMAIL);
+
+        // Act
         String extractedEmail = jwtUtil.extractEmail(token);
-        assertEquals(email, extractedEmail);
-    }
 
-    @Test
-    void testValidateToken_ValidToken() {
-        String token = jwtUtil.generateToken("test@example.com");
-        assertTrue(jwtUtil.validateToken(token));
-    }
-
-    @Test
-    void testValidateToken_InvalidToken() {
-        assertFalse(jwtUtil.validateToken("invalid.token.here"));
-    }
-
-    @Test
-    void testValidateToken_ExpiredToken() throws Exception {
-        // Create a JwtUtil with very short expiration (1ms)
-        JwtUtil shortJwtUtil = new JwtUtil(SECRET, 1);
-        
-        String token = shortJwtUtil.generateToken("test@example.com");
-        Thread.sleep(2); // Wait for token to expire
-        
-        assertFalse(shortJwtUtil.validateToken(token));
-    }
-    
-    @Test
-    void testValidateToken_NullToken() {
-        assertFalse(jwtUtil.validateToken(null));
+        // Assert
+        assertEquals(TEST_EMAIL, extractedEmail);
     }
 }

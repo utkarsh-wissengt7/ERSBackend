@@ -91,14 +91,14 @@ class NotificationServiceTest {
         assertEquals("WCS171", result.get(0).getUserId());
     }
 
-    // @Test
-    // void testDeleteNotification() {
-    //     doNothing().when(notificationRepository).deleteById(1L);
+    @Test
+    void testDeleteNotification() {
+        doNothing().when(notificationRepository).deleteById(1L);
 
-    //     notificationService.deleteNotification(1L);
+        notificationService.deleteNotification(1L);
 
-    //     verify(notificationRepository, times(1)).deleteById(1L);
-    // }
+        verify(notificationRepository, times(1)).deleteById(1L);
+    }
 
     @Test
     void testNotificationNotFound() {
