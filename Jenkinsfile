@@ -19,9 +19,9 @@ pipeline {
             }
         }
         
-        stage('Test') {
+        stage('Test & Coverage') {
             steps {
-                bat 'gradlew test jacocoTestReport'
+                bat 'gradlew clean test jacocoTestReport'
                 junit '**/build/test-results/test/*.xml'
                 recordCoverage(
                     tools: [[parser: 'JACOCO']],
@@ -30,7 +30,7 @@ pipeline {
                     name: 'Java Coverage'
                 )
             }
-        }
+}
         
         stage('SonarQube Analysis') {
             environment {
@@ -38,13 +38,14 @@ pipeline {
             }
             steps {
                 bat """
-                    gradlew sonar \
+                    gradlew build sonar \
                     -Dsonar.projectKey=ers-backend-project \
                     -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.token=%SONAR_TOKEN%
+                    -Dsonar.token=%SONAR_TOKEN% \
+                    --info
                 """
             }
-        }
+}
         
         stage('Build Docker Image') {
             steps {
