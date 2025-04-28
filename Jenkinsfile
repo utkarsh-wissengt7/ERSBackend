@@ -5,6 +5,12 @@ pipeline {
         gradle 'Gradle'
         jdk 'JDK17'
     }
+
+    environment {
+        DOCKER_IMAGE = 'utkarshgt78/ers-backend'
+        DOCKER_TAG = "${BUILD_NUMBER}"
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+    }
     
     stages {
         stage('Checkout') {
@@ -50,9 +56,26 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat 'docker version'  // Check if Docker is available
-                    bat 'docker info'     // Check Docker system info
-                    bat 'docker build -t ers-backend .'
+                    bat 'docker version'
+                    bat 'docker info'
+                    bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    bat "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                }
+            }
+        }
+
+
+        stage('Push to DockerHub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
+                                                    usernameVariable: 'DOCKER_USERNAME', 
+                                                    passwordVariable: 'DOCKER_PASSWORD')]) {
+                        bat 'echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin'
+                        bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                        bat "docker push ${DOCKER_IMAGE}:latest"
+                        bat 'docker logout'
+                    }
                 }
             }
         }
@@ -61,6 +84,11 @@ pipeline {
     post {
         always {
             cleanWs()
+            script {
+                // Clean up Docker images
+                bat "docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true"
+                bat "docker rmi ${DOCKER_IMAGE}:latest || true"
+            }
         }
         success {
             echo 'Build succeeded!'
