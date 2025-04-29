@@ -2,19 +2,13 @@ package com.example.demo.services;
 
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
+import com.example.demo.exceptions.UserValidationException;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import com.example.demo.exceptions.ResourceNotFoundException;
-import org.springframework.web.bind.annotation.PutMapping;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -36,9 +30,44 @@ public class UserService{
 
 
     public User createUser(User user) throws MessagingException, IOException {
+        // Check if WissenID already exists
+        if (userRepository.findById(user.getWissenID()).isPresent()) {
+            throw new UserValidationException("WissenID " + user.getWissenID() + " already exists.");
+        }
+
         // Check if email already exists
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists.");
+            throw new UserValidationException("Email " + user.getEmail() + " already exists.");
+        }
+
+        // Check if managerId exists in DB if provided
+        String managerId = user.getManagerId();
+        if (managerId != null && !managerId.isEmpty()) {
+            Optional<User> managerOptional = userRepository.findById(managerId);
+            if (!managerOptional.isPresent()) {
+                throw new UserValidationException("Manager with ID " + managerId + " does not exist.");
+            }
+            // Update manager's reportees list
+            User manager = managerOptional.get();
+            List<String> managerReportees = manager.getReportees();
+            if (managerReportees == null) {
+                managerReportees = new ArrayList<>();
+            }
+            managerReportees.add(user.getWissenID());
+            manager.setReportees(managerReportees);
+            userRepository.save(manager);
+        }
+
+        // Validate reportees if provided
+        List<String> reportees = user.getReportees();
+        if (reportees != null && !reportees.isEmpty()) {
+            List<String> invalidReportees = reportees.stream()
+                .filter(reporteeId -> !userRepository.findById(reporteeId).isPresent())
+                .toList();
+            
+            if (!invalidReportees.isEmpty()) {
+                throw new UserValidationException("Following reportee IDs do not exist: " + String.join(", ", invalidReportees));
+            }
         }
 
         // Save the user
@@ -76,10 +105,32 @@ public class UserService{
 
     public User updateUser(String wissenID, User updatedUser) {
         return userRepository.findById(wissenID).map(user -> {
-            // Check if manager is being changed
+            // Check if new email already exists for a different user
+            Optional<User> existingUserWithEmail = userRepository.findByEmail(updatedUser.getEmail());
+            if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getWissenID().equals(wissenID)) {
+                throw new UserValidationException("Email " + updatedUser.getEmail() + " is already in use.");
+            }
+
+            // Validate new manager if being changed
             String oldManagerId = user.getManagerId();
             String newManagerId = updatedUser.getManagerId();
             boolean managerChanged = newManagerId != null && !newManagerId.equals(oldManagerId);
+
+            if (managerChanged && !userRepository.findById(newManagerId).isPresent()) {
+                throw new UserValidationException("Manager with ID " + newManagerId + " does not exist.");
+            }
+
+            // Validate reportees if provided
+            List<String> newReportees = updatedUser.getReportees();
+            if (newReportees != null && !newReportees.isEmpty()) {
+                List<String> invalidReportees = newReportees.stream()
+                    .filter(reporteeId -> !userRepository.findById(reporteeId).isPresent())
+                    .toList();
+                
+                if (!invalidReportees.isEmpty()) {
+                    throw new UserValidationException("Following reportee IDs do not exist: " + String.join(", ", invalidReportees));
+                }
+            }
 
             // Update user details
             user.setName(updatedUser.getName());
@@ -130,7 +181,7 @@ public class UserService{
             }
 
             return userRepository.save(user);
-        }).orElseThrow(() -> new RuntimeException("User not found"));
+        }).orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + wissenID));
     }
 
     public User toggleUserActiveStatus(String wissenID) {

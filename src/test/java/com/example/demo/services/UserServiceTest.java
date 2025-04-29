@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.exceptions.UserValidationException;
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
 import jakarta.mail.MessagingException;
@@ -67,11 +68,11 @@ class UserServiceTest {
 
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        Exception exception = assertThrows(UserValidationException.class, () -> {
             userService.createUser(user);
         });
 
-        assertEquals("Email already exists.", exception.getMessage());
+        assertEquals("Email test@example.com already exists.", exception.getMessage());
         verify(userRepository, times(1)).findByEmail("test@example.com");
     }
 
@@ -160,11 +161,11 @@ class UserServiceTest {
     void testUpdateUser_UserNotFound() {
         when(userRepository.findById("WCS999")).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
             userService.updateUser("WCS999", new User());
         });
 
-        assertEquals("User not found", exception.getMessage());
+        assertEquals("User not found with ID: WCS999", exception.getMessage());
         verify(userRepository, times(1)).findById("WCS999");
     }
 
@@ -216,5 +217,221 @@ class UserServiceTest {
 
         assertEquals("User not found with ID: WCS999", exception.getMessage());
         verify(userRepository, times(1)).findById("WCS999");
+    }
+
+    @Test
+    void testCreateUser_WissenIdAlreadyExists() {
+        User user = new User();
+        user.setWissenID("WCS171");
+        
+        when(userRepository.findById("WCS171")).thenReturn(Optional.of(new User()));
+
+        Exception exception = assertThrows(UserValidationException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("WissenID WCS171 already exists.", exception.getMessage());
+        verify(userRepository, times(1)).findById("WCS171");
+    }
+
+    @Test
+    void testCreateUser_WithValidManager() throws MessagingException, IOException {
+        User user = new User();
+        user.setWissenID("WCS171");
+        user.setManagerId("MGR001");
+        
+        User manager = new User();
+        manager.setWissenID("MGR001");
+        manager.setReportees(new ArrayList<>());
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.empty());
+        when(userRepository.findById("MGR001")).thenReturn(Optional.of(manager));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        userService.createUser(user);
+
+        assertTrue(manager.getReportees().contains("WCS171"));
+        verify(userRepository, times(1)).save(manager);
+    }
+
+    @Test
+    void testCreateUser_WithInvalidManager() {
+        User user = new User();
+        user.setWissenID("WCS171");
+        user.setManagerId("INVALID");
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.empty());
+        when(userRepository.findById("INVALID")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(UserValidationException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Manager with ID INVALID does not exist.", exception.getMessage());
+    }
+
+    @Test
+    void testCreateUser_WithInvalidReportees() {
+        User user = new User();
+        user.setWissenID("WCS171");
+        List<String> reportees = Arrays.asList("WCS999", "WCS888");
+        user.setReportees(reportees);
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.empty());
+        when(userRepository.findById("WCS999")).thenReturn(Optional.empty());
+        when(userRepository.findById("WCS888")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(UserValidationException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Following reportee IDs do not exist: WCS999, WCS888", exception.getMessage());
+    }
+
+    @Test
+    void testCreateUser_NullReportees() throws MessagingException, IOException {
+        User user = new User();
+        user.setWissenID("WCS171");
+        user.setEmail("test@example.com");
+        user.setReportees(null);
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        User result = userService.createUser(user);
+        
+        assertNotNull(result.getReportees());
+        assertTrue(result.getReportees().isEmpty());
+    }
+
+    @Test
+    void testUpdateUser_DuplicateEmail() {
+        User existingUser = new User();
+        existingUser.setWissenID("WCS171");
+        existingUser.setEmail("existing@example.com");
+
+        User otherUser = new User();
+        otherUser.setWissenID("WCS172");
+        otherUser.setEmail("other@example.com");
+
+        User updatedUser = new User();
+        updatedUser.setEmail("other@example.com");
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByEmail("other@example.com")).thenReturn(Optional.of(otherUser));
+
+        Exception exception = assertThrows(UserValidationException.class, () -> {
+            userService.updateUser("WCS171", updatedUser);
+        });
+
+        assertEquals("Email other@example.com is already in use.", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateUser_WithInvalidReportees() {
+        User existingUser = new User();
+        existingUser.setWissenID("WCS171");
+
+        User updatedUser = new User();
+        updatedUser.setReportees(Arrays.asList("INVALID1", "INVALID2"));
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.of(existingUser));
+        when(userRepository.findById("INVALID1")).thenReturn(Optional.empty());
+        when(userRepository.findById("INVALID2")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(UserValidationException.class, () -> {
+            userService.updateUser("WCS171", updatedUser);
+        });
+
+        assertEquals("Following reportee IDs do not exist: INVALID1, INVALID2", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateUser_WithNewManager_ManagerNotFound() {
+        User existingUser = new User();
+        existingUser.setWissenID("WCS171");
+        existingUser.setManagerId("MGR001");
+
+        User updatedUser = new User();
+        updatedUser.setManagerId("INVALID");
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.of(existingUser));
+        when(userRepository.findById("INVALID")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(UserValidationException.class, () -> {
+            userService.updateUser("WCS171", updatedUser);
+        });
+
+        assertEquals("Manager with ID INVALID does not exist.", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateUser_FullManagerTransition() {
+        // Setup existing user and managers
+        User existingUser = new User();
+        existingUser.setWissenID("WCS171");
+        existingUser.setManagerId("MGR001");
+
+        User oldManager = new User();
+        oldManager.setWissenID("MGR001");
+        oldManager.setReportees(new ArrayList<>(Arrays.asList("WCS171", "WCS172")));
+
+        User newManager = new User();
+        newManager.setWissenID("MGR002");
+        newManager.setReportees(new ArrayList<>());
+
+        User updatedUser = new User();
+        updatedUser.setManagerId("MGR002");
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.of(existingUser));
+        when(userRepository.findById("MGR001")).thenReturn(Optional.of(oldManager));
+        when(userRepository.findById("MGR002")).thenReturn(Optional.of(newManager));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User result = userService.updateUser("WCS171", updatedUser);
+
+        assertEquals("MGR002", result.getManagerId());
+        assertFalse(oldManager.getReportees().contains("WCS171"));
+        assertTrue(newManager.getReportees().contains("WCS171"));
+        verify(userRepository, times(3)).save(any(User.class));
+    }
+
+    @Test
+    void testUpdateUser_InitializeNewManagerReportees() {
+        User existingUser = new User();
+        existingUser.setWissenID("WCS171");
+
+        User newManager = new User();
+        newManager.setWissenID("MGR002");
+        newManager.setReportees(null);
+
+        User updatedUser = new User();
+        updatedUser.setManagerId("MGR002");
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.of(existingUser));
+        when(userRepository.findById("MGR002")).thenReturn(Optional.of(newManager));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User result = userService.updateUser("WCS171", updatedUser);
+
+        assertEquals("MGR002", result.getManagerId());
+        assertNotNull(newManager.getReportees());
+        assertTrue(newManager.getReportees().contains("WCS171"));
+    }
+
+    @Test
+    void testToggleUserActiveStatus_Inactive() {
+        User user = new User();
+        user.setWissenID("WCS171");
+        user.setActive(true);
+
+        when(userRepository.findById("WCS171")).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        User result = userService.toggleUserActiveStatus("WCS171");
+
+        assertFalse(result.isActive());
+        verify(userRepository).save(user);
     }
 }
