@@ -159,13 +159,6 @@ The project includes a Jenkins pipeline that:
 - Performs SonarQube analysis
 - Builds Docker image
 
-## 📚 Documentation
-
-API documentation is available through Swagger UI:
-```
-http://localhost:8081/swagger-ui/index.html
-```
-
 ## 🔒 Security Features
 
 - JWT-based authentication
